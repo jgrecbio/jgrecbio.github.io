@@ -1,0 +1,8 @@
+.DS_Store
+*.swo
+*.swp
+
+# hakyll
+_cache/
+_site/
+.stack-work/
