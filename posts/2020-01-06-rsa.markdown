@@ -2,15 +2,15 @@
 title: An Introduction for the RSA cryptosystem
 ---
 
-Introduction
-============
-
-This article will assume that the reader has some knowledge of modular
+*This article will assume that the reader has some knowledge of modular
 arithmetic and is comfortable with [modulo operation](https://en.wikipedia.org/wiki/Modulo_operation), [GCD](https://en.wikipedia.org/wiki/Greatest_common_divisor), the notion of
 [coprime integers](https://en.wikipedia.org/wiki/Modular_inverse), 
 integer and of [prime numbers](https://en.wikipedia.org/wiki/Prime_number). Here I want to
 insist on the fact that intergers have inverses modulo $n$ if and only
-if they are coprime to $n$.
+if they are coprime to $n$.*
+
+Introduction
+============
 
 The [RSA](https://en.wikipedia.org/wiki/RSA_(cryptosystem)) cryptosystem --- named after its co-creators R. Rivers, A.
 Shamir and L. Adelman --- is the most famous asymetric cryptosystem. By
@@ -23,7 +23,8 @@ algebra as it is sometimes called.
 The security of the RSA cryptosystem relies on the difficulty to compute
 the inverse of modular exponentiation $a^x \equiv b \mod{n}$. In RSA,
 all operations are performed in $\mathbb{Z}_n = \{0, \ldots, n - 1\}$.
-This is the so-called [inverse logarithm problem]. The idea behind RSA is
+This is the so-called [inverse logarithm problem](https://en.wikipedia.org/wiki/Discrete_logarithm).
+The idea behind RSA is
 fairly simple as well, it relies upon finding two integers $e$ and $d$,
 respectively coined public and private exponent, such that for all $a$
 in $\mathbb{Z}_n$, $a^{ed} \equiv 1 \mod{n}$. Then $e$, the public
@@ -54,7 +55,11 @@ $\alpha$ an element of that set. Let $\tau_{\alpha}$ be the map:
 $$\begin{aligned}
             \mathbb{Z}_{n}^{*} \rightarrow \mathbb{Z}_{n}^{*} \\
             \beta \longmapsto \alpha \beta
-    \end{aligned}$$ $\tau_{\alpha}$ is a bijective map:
+    \end{aligned}$$
+$\tau_{\alpha}$ is a bijective map. It means that this function has a
+one-to-one relation with each element of the input domain to the output domain.
+One easy conclusion from that is that there is the same number of element in
+the input and output domain, which the results that helps prove the following statements:
 $$\begin{aligned}
         &\tau_{\alpha}(\beta) = \tau_{\alpha}(\gamma) \\
         \iff &\alpha \beta = \alpha \gamma \\
@@ -74,14 +79,15 @@ Moreover there is a neat formula to compute $\phi{n}$ if $p$, $q$ the
 unique factors of $n$ are known, $\phi{n} = (p - 1)(q - 1)$. Once
 $\phi(n)$ is known, once can select an invertible integer $e$ in
 $\mathbb{Z}_{\phi(n)}^{*}$ and let $d$ be its unique inverse in
-$\mathbb{Z}_{\phi(n)}^{*}$. By definition
+$\mathbb{Z}_{\phi(n)}^{*}$.
+By definition
 $ed \equiv 1 \mod{\phi(n)} \iff ed = k\phi(n) + 1$. So let
 $a \in \mathbb{Z}_{n}^{*}$, then $a^{k\phi(n) + 1} \equiv a \mod{n}$,
 which shows that the decryption process works if $a$ is invertible. What
 if it is not the case:
 
 Let's compute the same modular exponentiation $\mod{p}$ for an integer
-$b$ which is not invertile modulo $n$. $$\begin{aligned}
+$b$ which is not invertible modulo $n$. $$\begin{aligned}
     b^{ed} &\equiv b^{k(p - 1)(q - 1)} \times b \mod{p}, k \in \mathbb{Z} \\
            &\equiv (b^{p - 1})^{k(q - 1)}\end{aligned}$$
 
@@ -146,7 +152,8 @@ Conclusion
 I just described what is called the schoolbook RSA. In order to make
 that cryptographic scheme secure, many more elements and verification
 are needed. And I want to insist on that, using the RSA this way is
-grossly insecure. By the way some specialists are [advocating](https://blog.trailofbits.com/2019/07/08/fuck-rsa/) to move
+grossly insecure. By the way some specialists are
+[advocating](https://blog.trailofbits.com/2019/07/08/fuck-rsa/) to move
 out from RSA (very strongly) as implementing a safe RSA system is a very hard feat.
  In the following posts, I will show and exploit some the
 weaknesses that the RSA cryptosystem can display. The first of these
