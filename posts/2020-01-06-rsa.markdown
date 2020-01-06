@@ -98,7 +98,8 @@ Write your own (very insecure RSA)
 
 You may have heard about that rule: [never roll your own crypto](http://loup-vaillant.fr/articles/rolling-your-own-crypto). And I'm
 about to do just that and then never use it! But I want to show how easy
-to write a simple RSA scheme.
+to write a simple RSA scheme. In haskell, the goto library to find secure
+and efficient cryptography primitives is [cryptonite](https://hackage.haskell.org/package/cryptonite).
 
 ```haskell
 import Crypto.Number.Prime
