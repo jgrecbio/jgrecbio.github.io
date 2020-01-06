@@ -12,7 +12,7 @@ integer and of [prime numbers](https://en.wikipedia.org/wiki/Prime_number). Here
 insist on the fact that intergers have inverses modulo $n$ if and only
 if they are coprime to $n$.
 
-The [RSA](https://en.wikipedia.org/wiki/RSA_(cryptosystem) cryptosystem --- named after its co-creators R. Rivers, A.
+The [RSA](https://en.wikipedia.org/wiki/RSA_(cryptosystem)) cryptosystem --- named after its co-creators R. Rivers, A.
 Shamir and L. Adelman --- is the most famous asymetric cryptosystem. By
 asymetric, one means that the keys required for both encryption and
 decryption are not the same. Although its inception is fairly recent,
