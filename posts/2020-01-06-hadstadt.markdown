@@ -11,18 +11,26 @@ estranged to one another among them, relies on its asymetry of RSA. So
 far, RSA stands on its feet mathematically. Nobody has ever published a
 method that fatally break RSA encryption. One can always speculate that
 some intelligence agencies can, but it is only a guess without much
-evidence to support it, although now 768-bit length keys are no longer
+evidence to support it, although now
+[768-bit length](https://en.wikipedia.org/wiki/RSA_Factoring_Challenge)
+keys are no longer
 secure, 1024 should at least be used. 1024 bit-long keys are supposed
-to factorized in the following years. It is already believed to be 
-possible for some states to crack such keys, but a very high cost.
+to factorized in the
+[following years](https://crypto.stackexchange.com/questions/1978/how-big-an-rsa-key-is-considered-secure-today).
+By the way, if you feel adventurous,
+there is 100 000$ bounty if you can find the factors of a RSA key.
+It is already believed to be 
+possible for some states to crack such keys, but a very high cost (probably much
+higher than 100 000$).
 That is the reason the research on RSA has been
 mainly applied on what is called a relaxed-mode RSA. Meaning that
-weaknesses are deliberatly or some knowledge about the plaintext are
+weaknesses are deliberatly present or some knowledge about the plaintext are
 known by an attacker, let's call that attacker Eve. And of course, Eve
 is trying to spy on Bob and Alice.
 
-The Hadstadt's attack is easier to understand once the Chinese Remainder
-Problem theorem (CRT) has been explained.
+The Hadstadt's attack is easier to understand once the
+[Chinese Remainder Problem theorem](https://en.wikipedia.org/wiki/Chinese_remainder_theorem)
+(CRT) has been explained.
 
 The Chinese Remainder Theorem
 -----------------------------
