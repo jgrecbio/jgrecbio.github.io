@@ -3,16 +3,18 @@ title: An Introduction for the RSA cryptosystem
 ---
 
 *This article will assume that the reader has some knowledge of modular
-arithmetic and is comfortable with [modulo operation](https://en.wikipedia.org/wiki/Modulo_operation), [GCD](https://en.wikipedia.org/wiki/Greatest_common_divisor), the notion of
-[coprime integers](https://en.wikipedia.org/wiki/Modular_inverse), 
-integer and of [prime numbers](https://en.wikipedia.org/wiki/Prime_number). Here I want to
-insist on the fact that intergers have inverses modulo $n$ if and only
+arithmetic and is comfortable with [modulo operations](https://en.wikipedia.org/wiki/Modulo_operation),
+[GCD](https://en.wikipedia.org/wiki/Greatest_common_divisor), the notion of
+[coprime integers](https://en.wikipedia.org/wiki/Modular_inverse)
+and of [prime numbers](https://en.wikipedia.org/wiki/Prime_number). Here I want to
+insist on the fact that integers have inverses modulo $n$ if and only
 if they are coprime to $n$.*
 
 Introduction
 ============
 
-The [RSA](https://en.wikipedia.org/wiki/RSA_(cryptosystem)) cryptosystem --- named after its co-creators R. Rivers, A.
+The [RSA](https://en.wikipedia.org/wiki/RSA_(cryptosystem)) cryptosystem
+--- named after its co-creators R. Rivers, A.
 Shamir and L. Adelman --- is the most famous asymetric cryptosystem. By
 asymetric, one means that the keys required for both encryption and
 decryption are not the same. Although its inception is fairly recent,
@@ -30,7 +32,7 @@ respectively coined public and private exponent, such that for all $a$
 in $\mathbb{Z}_n$, $a^{ed} \equiv 1 \mod{n}$. Then $e$, the public
 exponent, along with the moduli $n$, serve as the public key, and the
 private exponent $d$ is the private key. The ability to produce such
-integers $e$ and $d$ is based on the knowledge of the unique integer
+integer $e$ and $d$ is based on the knowledge of the unique integer
 factorization of $n$, which must be the product of two large primes in
 case of RSA cryptosystem.
 
@@ -40,7 +42,7 @@ The euler theorem or how to generate $e$ and $d$
 Let's define the [euler totient function](https://en.wikipedia.org/wiki/Euler's_totient_function) $\phi(n)$, it simply computes
 the number of positive integer inferior to $n$ that are coprime to $n$.
 This set of all coprime to $n$ is denoted $\mathbb{Z}_n^{*}$. In the
-case that $n$ is prime number, the computation of $\phi(n)$ is easy, all
+case that $n$ is a prime number, the computation of $\phi(n)$ is easy, all
 the integer below $n$ are coprime to $n$, otherwise $n$ could not be
 prime. So, in that case $\phi(n) = p - 1$.
 
@@ -69,7 +71,7 @@ $$\begin{aligned}
 As $\tau_{\alpha}$ bijective, it means that this function has a
 one-to-one relation with each element of the input domain to the output domain.
 One easy conclusion from that is that there is the same number of element in
-the input and output domain, which the results that helps prove the following statements:
+the input and output domain, which si the result that helps prove the following statements:
 $$\begin{aligned}
         &\displaystyle\prod_{\beta \in \mathbb{Z}_{n}^{*}} \tau_{\alpha}(\beta) = \displaystyle\prod_{\beta \in \mathbb{Z}_{n}^{*}} \beta \\
         \iff &\alpha^{\phi(n)} \displaystyle\prod_{\beta \in \mathbb{Z}_{n}^{*}} \beta =
@@ -95,11 +97,17 @@ $b$ which is not invertible modulo $n$. $$\begin{aligned}
 
 By using the euler theorem, as $\phi(p) = p - 1$, one can prove that
 $a^{p - 1} \equiv 1 \mod{p}$ as $p$ is a prime number. By the way this
-fact is called fermat's little theorem. So $b^{ed} \equiv b \mod{p}$. By
-applying the same reasonning, $b^{ed} \equiv b \mod{q}$. So one can see
+fact is called
+[fermat's little theorem](https://en.wikipedia.org/wiki/Fermat%27s_little_theorem).
+So $b^{ed} \equiv b \mod{p}$. By
+applying the same reasoning, $b^{ed} \equiv b \mod{q}$. So one can see
 that $b^{ed} \equiv b \mod{n}$, which shows that decryption process
-works for all integer below $n$.
-
+works for all integer below $n$. In the case, it does not appear evident,
+which was not the first time for me either, playing with the meaning of this
+system of equations with a pen and paper should help a lot.
+Also the [next article](./2020-01-06-hadstadt.html)
+will help with a special abstraction, the chinese remainder
+theorem.
 
 Write your own (very insecure RSA)
 ==================================
@@ -129,7 +137,7 @@ generateExponents (p, q) = (n, e, d)
 
 As explained, $e$ is the public exponent and $d$ is the private exponent. It is
 recommended to chose $e$ as a prime so that it is coprime to $\phi(pq)$.
-$e$ is here a fermat prime, which speeds up the modular expoentiation algorithm
+$e$ is here a fermat prime, which speeds up the modular exponentiation algorithm
 which will be the subject for a later post.
 Once the keys are generated, let's show the encryption process:
 
@@ -159,4 +167,4 @@ grossly insecure. By the way some specialists are
 out from RSA (very strongly) as implementing a safe RSA system is a very hard feat.
  In the following posts, I will show and exploit some the
 weaknesses that the RSA cryptosystem can display. The first of these
-will be the Hadstadt attack.
+will be the [Hadstadt attack](./2020-01-06-hadstadt.html).
