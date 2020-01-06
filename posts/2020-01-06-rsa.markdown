@@ -6,12 +6,13 @@ Introduction
 ============
 
 This article will assume that the reader has some knowledge of modular
-arithmetic and is comfortable with congruences, GCD, the notion of
-coprime integers, integer inverses and of prime numbers. Here I want to
+arithmetic and is comfortable with [modulo operation](https://en.wikipedia.org/wiki/Modulo_operation), [GCD](https://en.wikipedia.org/wiki/Greatest_common_divisor), the notion of
+[coprime integers](https://en.wikipedia.org/wiki/Modular_inverse), 
+integer and of [prime numbers](https://en.wikipedia.org/wiki/Prime_number). Here I want to
 insist on the fact that intergers have inverses modulo $n$ if and only
 if they are coprime to $n$.
 
-The RSA cryptosystem --- named after its co-creators R. Rivers, A.
+The [RSA](https://en.wikipedia.org/wiki/RSA_(cryptosystem) cryptosystem --- named after its co-creators R. Rivers, A.
 Shamir and L. Adelman --- is the most famous asymetric cryptosystem. By
 asymetric, one means that the keys required for both encryption and
 decryption are not the same. Although its inception is fairly recent,
@@ -22,7 +23,7 @@ algebra as it is sometimes called.
 The security of the RSA cryptosystem relies on the difficulty to compute
 the inverse of modular exponentiation $a^x \equiv b \mod{n}$. In RSA,
 all operations are performed in $\mathbb{Z}_n = \{0, \ldots, n - 1\}$.
-This is the so-called inverse logarithm problem. The idea behind RSA is
+This is the so-called [inverse logarithm problem]. The idea behind RSA is
 fairly simple as well, it relies upon finding two integers $e$ and $d$,
 respectively coined public and private exponent, such that for all $a$
 in $\mathbb{Z}_n$, $a^{ed} \equiv 1 \mod{n}$. Then $e$, the public
@@ -35,7 +36,7 @@ case of RSA cryptosystem.
 The euler theorem or how to generate $e$ and $d$
 ================================================
 
-Let's define the euler totient function $\phi(n)$, it simply computes
+Let's define the [euler totient function](https://en.wikipedia.org/wiki/Euler's_totient_function) $\phi(n)$, it simply computes
 the number of positive integer inferior to $n$ that are coprime to $n$.
 This set of all coprime to $n$ is denoted $\mathbb{Z}_n^{*}$. In the
 case that $n$ is prime number, the computation of $\phi(n)$ is easy, all
@@ -91,8 +92,61 @@ applying the same reasonning, $b^{ed} \equiv b \mod{q}$. So one can see
 that $b^{ed} \equiv b \mod{n}$, which shows that decryption process
 works for all integer below $n$.
 
-I just described what is called the RSA schoolbook. In order to make
+
+Write your own (very insecure RSA)
+==================================
+
+You may have heard about that rule: [never roll your own crypto](http://loup-vaillant.fr/articles/rolling-your-own-crypto). And I'm
+about to do just that and then never use it! But I want to show how easy
+to write a simple RSA scheme.
+
+```haskell
+import Crypto.Number.Prime
+import Crypte.Number.ModArithmetic
+
+keyGeneration :: MonadRandom m => m (Integer, Integer)
+keyGeneration = do
+	p <- generatePrime 512
+	q <- generatePrime 512
+	return (p, q)
+
+generateExponents :: (Integer, Integer) -> (Integer, Integer, Integer)
+generateExponents (p, q) = (n, e, d)
+	where n = p * q
+		  phi = (p - 1) * (q - 1)
+		  e = 65337
+		  d = inverseCoprimes e phi
+```
+
+As explained, $e$ is the public exponent and $d$ is the private exponent. It is
+recommended to chose $e$ as a prime so that it is coprime to $\phi(pq)$.
+$e$ is here a fermat prime, which speeds up the modular expoentiation algorithm
+which will be the subject for a later post.
+Once the keys are generated, let's show the encryption process:
+
+```haskell
+type PublicExponent = Integer
+type Plaintext = Integer
+type Moduli = Integer
+type Ciphertext = Integer
+
+encrypt :: PublicExponent -> Moduli -> Plaintext -> Ciphertext
+encrypt e n plaintext = expSafe plaintext e n
+
+decrypt :: PrivateExponent -> Moduli -> Ciphertext -> Plaintext
+decrypt d n ciphertex = expSafe ciphertext d n
+```
+
+And that's it.
+
+Conclusion
+==========
+
+I just described what is called the schoolbook RSA. In order to make
 that cryptographic scheme secure, many more elements and verification
-are needed. In the following posts, I will show and exploit some the
+are needed. And I want to insist on that, using the RSA this way is
+grossly insecure. By the way some specialists are [advocating](https://blog.trailofbits.com/2019/07/08/fuck-rsa/) to move
+out from RSA (very strongly) as implementing a safe RSA system is a very hard feat.
+ In the following posts, I will show and exploit some the
 weaknesses that the RSA cryptosystem can display. The first of these
 will be the Hadstadt attack.
