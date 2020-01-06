@@ -1,0 +1,101 @@
+---
+author:
+- 'Jean-Yves PASQUIER'
+title: Paillier Encryption Scheme for Encrypted Machine Learning
+  Inference
+---
+
+Introduction
+============
+
+This article will assume that the reader has some knowledge of modular
+arithmetic and is comfortable with congruences, GCD, the notion of
+coprime integers, integer inverses and of prime numbers. Here I want to
+insist on the fact that intergers have inverses modulo $n$ if and only
+if they are coprime to $n$.
+
+The RSA cryptosystem --- named after its co-creators R. Rivers, A.
+Shamir and L. Adelman --- is the most famous asymetric cryptosystem. By
+asymetric, one means that the keys required for both encryption and
+decryption are not the same. Although its inception is fairly recent,
+the mathematics required for RSA has been known for almost 200 years and
+are not very complicated. It is mostly modular arithmetics, clock
+algebra as it is sometimes called.
+
+The security of the RSA cryptosystem relies on the difficulty to compute
+the inverse of modular exponentiation $a^x \equiv b \mod{n}$. In RSA,
+all operations are performed in $\mathbb{Z}_n = \{0, \ldots, n - 1\}$.
+This is the so-called inverse logarithm problem. The idea behind RSA is
+fairly simple as well, it relies upon finding two integers $e$ and $d$,
+respectively coined public and private exponent, such that for all $a$
+in $\mathbb{Z}_n$, $a^{ed} \equiv 1 \mod{n}$. Then $e$, the public
+exponent, along with the moduli $n$, serve as the public key, and the
+private exponent $d$ is the private key. The ability to produce such
+integers $e$ and $d$ is based on the knowledge of the unique integer
+factorization of $n$, which must be the product of two large primes in
+case of RSA cryptosystem.
+
+The euler theorem or how to generate $e$ and $d$
+================================================
+
+Let's define the euler totient function $\phi(n)$, it simply computes
+the number of positive integer inferior to $n$ that are coprime to $n$.
+This set of all coprime to $n$ is denoted $\mathbb{Z}_n^{*}$. In the
+case that $n$ is prime number, the computation of $\phi(n)$ is easy, all
+the integer below $n$ are coprime to $n$, otherwise $n$ could not be
+prime. So, in that case $\phi(n) = p - 1$.
+
+And there is another neat fact about this function: $$\begin{aligned}
+    \forall a \in \mathbb{Z}_{n}^{*} \\
+    a^{\phi(n)} \equiv 1 \mod{n}\end{aligned}$$
+
+#### proof
+
+Let $\mathbb{Z}_{n}^{*}$ the set of integers coprime to $\mathbb{Z}$ and
+$\alpha$ an element of that set. Let $\tau_{\alpha}$ be the map:
+$$\begin{aligned}
+            \mathbb{Z}_{n}^{*} \rightarrow \mathbb{Z}_{n}^{*} \\
+            \beta \longmapsto \alpha \beta
+    \end{aligned}$$ $\tau_{\alpha}$ is a bijective map:
+$$\begin{aligned}
+        &\tau_{\alpha}(\beta) = \tau_{\alpha}(\gamma) \\
+        \iff &\alpha \beta = \alpha \gamma \\
+        \iff &\beta = \gamma \\
+        \implies &\tau_{\alpha} injective \\
+    \end{aligned}$$ $$\begin{aligned}
+        &\tau_{\alpha}(\alpha^{-1} \beta) = \alpha^{-1} \alpha \beta = \beta \\
+        \implies &\tau_{\alpha} surjective
+    \end{aligned}$$ As $\tau_{\alpha}$ bijective: $$\begin{aligned}
+        &\displaystyle\prod_{\beta \in \mathbb{Z}_{n}^{*}} \tau_{\alpha}(\beta) = \displaystyle\prod_{\beta \in \mathbb{Z}_{n}^{*}} \beta \\
+        \iff &\alpha^{\phi(n)} \displaystyle\prod_{\beta \in \mathbb{Z}_{n}^{*}} \beta =
+        \displaystyle\prod_{\beta \in \mathbb{Z}_{n}^{*}} \beta \\
+        \iff &\alpha^{\phi(n)} \equiv 1 \mod{n}
+    \end{aligned}$$
+
+Moreover there is a neat formula to compute $\phi{n}$ if $p$, $q$ the
+unique factors of $n$ are known, $\phi{n} = (p - 1)(q - 1)$. Once
+$\phi(n)$ is known, once can select an invertible integer $e$ in
+$\mathbb{Z}_{\phi(n)}^{*}$ and let $d$ be its unique inverse in
+$\mathbb{Z}_{\phi(n)}^{*}$. By definition
+$ed \equiv 1 \mod{phi(n)} \iff ed = k\phi(n) + 1$. So let
+$a \in \mathbb{Z}_{n}^{*}$, then $a^{k\phi(n) + 1} \equiv a \mod{n}$,
+which shows that the decryption process works if $a$ is invertible. What
+if it is not the case:
+
+Let's compute the same modular exponentiation $\mod{p}$ for an integer
+$b$ which is not invertile modulo $n$. $$\begin{aligned}
+    b^{ed} &\equiv b^{k(p - 1)(q - 1)} \times b \mod{p}, k \in \mathbb{Z} \\
+           &\equiv (b^{p - 1})^{k(q - 1)}\end{aligned}$$
+
+By using the euler theorem, as $\phi(p) = p - 1$, one can prove that
+$a^{p - 1} \equiv 1 \mod{p}$ as $p$ is a prime number. By the way this
+fact is called fermat's little theorem. So $b^{ed} \equiv b \mod{p}$. By
+applying the same reasonning, $b^{ed} \equiv b \mod{q}$. So one can see
+that $b^{ed} \equiv b \mod{n}$, which shows that decryption process
+works for all integer below $n$.
+
+I just described what is called the RSA schoolbook. In order to make
+that cryptographic scheme secure, many more elements and verification
+are needed. In the following posts, I will show and exploit some the
+weaknesses that the RSA cryptosystem can display. The first of these
+will be the Hadstadt attack.
