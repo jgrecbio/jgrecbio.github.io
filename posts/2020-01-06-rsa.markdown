@@ -1,5 +1,5 @@
 ---
-An Introduction for the RSA cryptosystem
+title: An Introduction for the RSA cryptosystem
 ---
 
 Introduction
@@ -74,7 +74,7 @@ unique factors of $n$ are known, $\phi{n} = (p - 1)(q - 1)$. Once
 $\phi(n)$ is known, once can select an invertible integer $e$ in
 $\mathbb{Z}_{\phi(n)}^{*}$ and let $d$ be its unique inverse in
 $\mathbb{Z}_{\phi(n)}^{*}$. By definition
-$ed \equiv 1 \mod{phi(n)} \iff ed = k\phi(n) + 1$. So let
+$ed \equiv 1 \mod{\phi(n)} \iff ed = k\phi(n) + 1$. So let
 $a \in \mathbb{Z}_{n}^{*}$, then $a^{k\phi(n) + 1} \equiv a \mod{n}$,
 which shows that the decryption process works if $a$ is invertible. What
 if it is not the case:
