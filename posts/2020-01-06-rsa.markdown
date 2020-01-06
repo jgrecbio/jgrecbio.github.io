@@ -52,14 +52,11 @@ And there is another neat fact about this function: $$\begin{aligned}
 
 Let $\mathbb{Z}_{n}^{*}$ the set of integers coprime to $\mathbb{Z}$ and
 $\alpha$ an element of that set. Let $\tau_{\alpha}$ be the map:
+$\tau_{\alpha}$ is a bijective map. 
 $$\begin{aligned}
             \mathbb{Z}_{n}^{*} \rightarrow \mathbb{Z}_{n}^{*} \\
             \beta \longmapsto \alpha \beta
     \end{aligned}$$
-$\tau_{\alpha}$ is a bijective map. It means that this function has a
-one-to-one relation with each element of the input domain to the output domain.
-One easy conclusion from that is that there is the same number of element in
-the input and output domain, which the results that helps prove the following statements:
 $$\begin{aligned}
         &\tau_{\alpha}(\beta) = \tau_{\alpha}(\gamma) \\
         \iff &\alpha \beta = \alpha \gamma \\
@@ -68,7 +65,12 @@ $$\begin{aligned}
     \end{aligned}$$ $$\begin{aligned}
         &\tau_{\alpha}(\alpha^{-1} \beta) = \alpha^{-1} \alpha \beta = \beta \\
         \implies &\tau_{\alpha} surjective
-    \end{aligned}$$ As $\tau_{\alpha}$ bijective: $$\begin{aligned}
+    \end{aligned}$$
+As $\tau_{\alpha}$ bijective, it means that this function has a
+one-to-one relation with each element of the input domain to the output domain.
+One easy conclusion from that is that there is the same number of element in
+the input and output domain, which the results that helps prove the following statements:
+$$\begin{aligned}
         &\displaystyle\prod_{\beta \in \mathbb{Z}_{n}^{*}} \tau_{\alpha}(\beta) = \displaystyle\prod_{\beta \in \mathbb{Z}_{n}^{*}} \beta \\
         \iff &\alpha^{\phi(n)} \displaystyle\prod_{\beta \in \mathbb{Z}_{n}^{*}} \beta =
         \displaystyle\prod_{\beta \in \mathbb{Z}_{n}^{*}} \beta \\
