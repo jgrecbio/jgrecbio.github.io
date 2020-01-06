@@ -37,7 +37,9 @@ packages:
 # Dependency packages to be pulled from upstream that are not in the resolver
 # using the same syntax as the packages field.
 # (e.g., acme-missiles-0.3)
-# extra-deps: []
+extra-deps:
+        - latex-formulae-image-0.1.1.4@sha256:2df1a5ac8884ba9d82f42b85d378aade0ee5b25e4808a80b6c4551d5b36f2554
+        - latex-formulae-pandoc-0.2.0.6@sha256:877ff7e2540fdd85aeaaaa2ac1002c775f1dd0a3880e01207683447793f88fa4
 
 # Override default flag values for local packages and extra-deps
 # flags: {}
