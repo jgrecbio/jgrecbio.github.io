@@ -100,6 +100,9 @@ this equation below the product of all $n_i$. So one can retrieve the
 message by computing the third root of $c$.
 
 ```haskell
+import Math.NumberTheory.Powers
+
+
 crt :: [Integer] -> [Integer] -> Integer
 crt nis ais = let n = product nis
 coprimeNis = map (n `quot`) nis
