@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>Harpocrate's adventuresPaillier Encryption Scheme for Encrypted Machine Learning Inference</title>
+        <link rel="stylesheet" type="text/css" href="../css/default.css" />
+    </head>
+    <body>
+        <div id="header">
+            <div id="logo">
+                <a href="../">Harpocrate's adventures</a>
+            </div>
+            <div id="navigation">
+                <a href="../">Home</a>
+                <a href="../about.html">About</a>
+                <a href="../contact.html">Contact</a>
+                <a href="../archive.html">Archive</a>
+            </div>
+        </div>
+
+        <div id="content">
+            <h1>Paillier Encryption Scheme for Encrypted Machine Learning Inference</h1>
+
+            <div class="info">
+    Posted on January  6, 2020
+    
+</div>
+
+<h1 id="introduction">Introduction</h1>
+<p>This article will assume that the reader has some knowledge of modular arithmetic and is comfortable with congruences, GCD, the notion of coprime integers, integer inverses and of prime numbers. Here I want to insist on the fact that intergers have inverses modulo <span class="math inline"><em>n</em></span> if and only if they are coprime to <span class="math inline"><em>n</em></span>.</p>
+<p>The RSA cryptosystem — named after its co-creators R. Rivers, A. Shamir and L. Adelman — is the most famous asymetric cryptosystem. By asymetric, one means that the keys required for both encryption and decryption are not the same. Although its inception is fairly recent, the mathematics required for RSA has been known for almost 200 years and are not very complicated. It is mostly modular arithmetics, clock algebra as it is sometimes called.</p>
+<p>The security of the RSA cryptosystem relies on the difficulty to compute the inverse of modular exponentiation <span class="math inline"><em>a</em><sup><em>x</em></sup> ≡ <em>b</em>mod <em>n</em></span>. In RSA, all operations are performed in <span class="math inline">ℤ<sub><em>n</em></sub> = {0, …, <em>n</em> − 1}</span>. This is the so-called inverse logarithm problem. The idea behind RSA is fairly simple as well, it relies upon finding two integers <span class="math inline"><em>e</em></span> and <span class="math inline"><em>d</em></span>, respectively coined public and private exponent, such that for all <span class="math inline"><em>a</em></span> in <span class="math inline">ℤ<sub><em>n</em></sub></span>, <span class="math inline"><em>a</em><sup><em>e</em><em>d</em></sup> ≡ 1mod <em>n</em></span>. Then <span class="math inline"><em>e</em></span>, the public exponent, along with the moduli <span class="math inline"><em>n</em></span>, serve as the public key, and the private exponent <span class="math inline"><em>d</em></span> is the private key. The ability to produce such integers <span class="math inline"><em>e</em></span> and <span class="math inline"><em>d</em></span> is based on the knowledge of the unique integer factorization of <span class="math inline"><em>n</em></span>, which must be the product of two large primes in case of RSA cryptosystem.</p>
+<h1 id="the-euler-theorem-or-how-to-generate-e-and-d">The euler theorem or how to generate <span class="math inline"><em>e</em></span> and <span class="math inline"><em>d</em></span></h1>
+<p>Let’s define the euler totient function <span class="math inline"><em>ϕ</em>(<em>n</em>)</span>, it simply computes the number of positive integer inferior to <span class="math inline"><em>n</em></span> that are coprime to <span class="math inline"><em>n</em></span>. This set of all coprime to <span class="math inline"><em>n</em></span> is denoted <span class="math inline">ℤ<sub><em>n</em></sub><sup>*</sup></span>. In the case that <span class="math inline"><em>n</em></span> is prime number, the computation of <span class="math inline"><em>ϕ</em>(<em>n</em>)</span> is easy, all the integer below <span class="math inline"><em>n</em></span> are coprime to <span class="math inline"><em>n</em></span>, otherwise <span class="math inline"><em>n</em></span> could not be prime. So, in that case <span class="math inline"><em>ϕ</em>(<em>n</em>) = <em>p</em> − 1</span>.</p>
+<p>And there is another neat fact about this function: <br /><span class="math display">$$\begin{aligned}
+    \forall a \in \mathbb{Z}_{n}^{*} \\
+    a^{\phi(n)} \equiv 1 \mod{n}\end{aligned}$$</span><br /></p>
+<h4 id="proof">proof</h4>
+<p>Let <span class="math inline">ℤ<sub><em>n</em></sub><sup>*</sup></span> the set of integers coprime to <span class="math inline">ℤ</span> and <span class="math inline"><em>α</em></span> an element of that set. Let <span class="math inline"><em>τ</em><sub><em>α</em></sub></span> be the map: <br /><span class="math display">$$\begin{aligned}
+            \mathbb{Z}_{n}^{*} \rightarrow \mathbb{Z}_{n}^{*} \\
+            \beta \longmapsto \alpha \beta
+    \end{aligned}$$</span><br /> <span class="math inline"><em>τ</em><sub><em>α</em></sub></span> is a bijective map: <br /><span class="math display">$$\begin{aligned}
+        &amp;\tau_{\alpha}(\beta) = \tau_{\alpha}(\gamma) \\
+        \iff &amp;\alpha \beta = \alpha \gamma \\
+        \iff &amp;\beta = \gamma \\
+        \implies &amp;\tau_{\alpha} injective \\
+    \end{aligned}$$</span><br /> <br /><span class="math display">$$\begin{aligned}
+        &amp;\tau_{\alpha}(\alpha^{-1} \beta) = \alpha^{-1} \alpha \beta = \beta \\
+        \implies &amp;\tau_{\alpha} surjective
+    \end{aligned}$$</span><br /> As <span class="math inline"><em>τ</em><sub><em>α</em></sub></span> bijective: <br /><span class="math display">$$\begin{aligned}
+        &amp;\displaystyle\prod_{\beta \in \mathbb{Z}_{n}^{*}} \tau_{\alpha}(\beta) = \displaystyle\prod_{\beta \in \mathbb{Z}_{n}^{*}} \beta \\
+        \iff &amp;\alpha^{\phi(n)} \displaystyle\prod_{\beta \in \mathbb{Z}_{n}^{*}} \beta =
+        \displaystyle\prod_{\beta \in \mathbb{Z}_{n}^{*}} \beta \\
+        \iff &amp;\alpha^{\phi(n)} \equiv 1 \mod{n}
+    \end{aligned}$$</span><br /></p>
+<p>Moreover there is a neat formula to compute <span class="math inline"><em>ϕ</em><em>n</em></span> if <span class="math inline"><em>p</em></span>, <span class="math inline"><em>q</em></span> the unique factors of <span class="math inline"><em>n</em></span> are known, <span class="math inline"><em>ϕ</em><em>n</em> = (<em>p</em> − 1)(<em>q</em> − 1)</span>. Once <span class="math inline"><em>ϕ</em>(<em>n</em>)</span> is known, once can select an invertible integer <span class="math inline"><em>e</em></span> in <span class="math inline">ℤ<sub><em>ϕ</em>(<em>n</em>)</sub><sup>*</sup></span> and let <span class="math inline"><em>d</em></span> be its unique inverse in <span class="math inline">ℤ<sub><em>ϕ</em>(<em>n</em>)</sub><sup>*</sup></span>. By definition <span class="math inline"><em>e</em><em>d</em> ≡ 1mod <em>p</em><em>h</em><em>i</em>(<em>n</em>) ⇔ <em>e</em><em>d</em> = <em>k</em><em>ϕ</em>(<em>n</em>) + 1</span>. So let <span class="math inline"><em>a</em> ∈ ℤ<sub><em>n</em></sub><sup>*</sup></span>, then <span class="math inline"><em>a</em><sup><em>k</em><em>ϕ</em>(<em>n</em>) + 1</sup> ≡ <em>a</em>mod <em>n</em></span>, which shows that the decryption process works if <span class="math inline"><em>a</em></span> is invertible. What if it is not the case:</p>
+<p>Let’s compute the same modular exponentiation <span class="math inline">mod <em>p</em></span> for an integer <span class="math inline"><em>b</em></span> which is not invertile modulo <span class="math inline"><em>n</em></span>. <br /><span class="math display">$$\begin{aligned}
+    b^{ed} &amp;\equiv b^{k(p - 1)(q - 1)} \times b \mod{p}, k \in \mathbb{Z} \\
+           &amp;\equiv (b^{p - 1})^{k(q - 1)}\end{aligned}$$</span><br /></p>
+<p>By using the euler theorem, as <span class="math inline"><em>ϕ</em>(<em>p</em>) = <em>p</em> − 1</span>, one can prove that <span class="math inline"><em>a</em><sup><em>p</em> − 1</sup> ≡ 1mod <em>p</em></span> as <span class="math inline"><em>p</em></span> is a prime number. By the way this fact is called fermat’s little theorem. So <span class="math inline"><em>b</em><sup><em>e</em><em>d</em></sup> ≡ <em>b</em>mod <em>p</em></span>. By applying the same reasonning, <span class="math inline"><em>b</em><sup><em>e</em><em>d</em></sup> ≡ <em>b</em>mod <em>q</em></span>. So one can see that <span class="math inline"><em>b</em><sup><em>e</em><em>d</em></sup> ≡ <em>b</em>mod <em>n</em></span>, which shows that decryption process works for all integer below <span class="math inline"><em>n</em></span>.</p>
+<p>I just described what is called the RSA schoolbook. In order to make that cryptographic scheme secure, many more elements and verification are needed. In the following posts, I will show and exploit some the weaknesses that the RSA cryptosystem can display. The first of these will be the Hadstadt attack.</p>
+
+        </div>
+		<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <div id="footer">
+            Site proudly generated by
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>            <a href="http://jaspervdj.be/hakyll">Hakyll</a>
+        </div>
+    </body>
+</html>
