@@ -147,4 +147,4 @@ the form $2^{2^n} + 1$. This actually helps to optimize the modular
 exponentiation algorithm upon which is build the RSA scheme. But, the
 modular exponentiation and its algorithm deserve a post on their own.
 The code for mounting this attack is fairly simple, this explains why
-this attack is very often present in [CTFs](
+this attack is very often present in [CTFs](https://cryptopals.com/sets/5/challenges/40)
