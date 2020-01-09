@@ -6,8 +6,8 @@ The Hastadt's attack on broadcast message
 =========================================
 
 The RSA cryptosystem has been on a lot of scrutiny since its invention.
-The ability for many application on the internet, payment between people
-estranged to one another among them, relies on its asymetry of RSA. So
+The ability for many applications on the internet, like payment between people
+estranged to one another among them, relies on the asymetry of RSA. So
 far, RSA stands on its feet mathematically. Nobody has ever published a
 method that fatally break RSA encryption. One can always speculate that
 some intelligence agencies can, but it is only a guess without much
@@ -18,19 +18,23 @@ secure, 1024 should at least be used. 1024 bit-long keys are supposed
 to factorized in the
 [following years](https://crypto.stackexchange.com/questions/1978/how-big-an-rsa-key-is-considered-secure-today).
 By the way, if you feel adventurous,
-there is 100 000$ bounty if you can find the factors of a RSA key.
+there is a 100 000$ bounty if you can find the factors of a given RSA key.
 It is already believed to be 
-possible for some states to crack such keys, but a very high cost (probably much
+possible for some states to crack such keys or are about to be, but at very high cost (probably much
 higher than 100 000$).
-That is the reason the research on RSA has been
-mainly applied on what is called a relaxed-mode RSA. Meaning that
+That is the reason why the research on RSA cryptanalysis has been
+mainly focused on what is called a relaxed-mode RSA. Meaning that
 weaknesses are deliberatly present or some knowledge about the plaintext are
 known by an attacker, let's call that attacker Eve. And of course, Eve
-is trying to spy on Bob and Alice.
+is trying to spy on Bob and Alice. It makes sense to do research on
+a so-called relaxed-mode because it mimics RSA implementation errors or
+an insecure usage of the RSA cryptosystems. Some of these attacks were
+pratical.
 
-The Hadstadt's attack is easier to understand once the
+Here I will present theThe Hadstadt's attackn which
+is easier to understand once the
 [Chinese Remainder Problem theorem](https://en.wikipedia.org/wiki/Chinese_remainder_theorem)
-(CRT) has been explained.
+(CRT) has been introduced.
 
 The Chinese Remainder Theorem
 -----------------------------
@@ -38,7 +42,7 @@ The Chinese Remainder Theorem
 #### Theorem
 
 Let $\{a_i\}_{i=1}^{k}$ be a set of arbitrary integers and
-$\{n_i\}_{i=1}^{k}$ be a set of relatively prime integers. Then there
+$\{n_i\}_{i=1}^{k}$ be a set of relatively prime integer. Then there
 exist an integer $a$ such a that:
 $a \equiv a_i \mod n_i : \forall i \in {1, \ldots, k}$. Moreover, $a'$
 is also a solution to this system of congruence, if and only if
@@ -46,7 +50,8 @@ $a' \equiv a \mod{n}$.
 
 ##### proof
 
-This is a constructive proof, let's define
+This is a constructive proof, meaning it will provide
+a solution to generate the said solution, let's define
 $n_i^{*}=n_1 \times \cdots \times n_i / n_i$, $t_i$ such that
 $t_i \equiv (n_i^{*})^{-1} \mod{n_i}$ and $e_i = n_i^{*} t_i$. Then
 $e_i \equiv 1 \mod n_i$ and $e_i \equiv 0 \mod n_j$. So the sum of
@@ -54,7 +59,8 @@ $a_i e_i$ is a solution. If $a' \equiv a \mod{n}$ then:
 
 $$\begin{aligned}
 \iff &a - a' = 1 + k \prod_{i=1}^{k} n_i \\
-\iff &a \equiv a' \mod{n_i}\end{aligned}$$
+\iff &a \equiv a' \mod{n_i}
+\end{aligned}$$
 
 If $\forall i \in \{1, \ldots, k\} : a' \equiv a_i \mod{n_i}$ then
 $n_i | (a' - a)$. And as all $n_i$ are relatively prime, this imply that
@@ -63,40 +69,43 @@ $n | (a' - a)$. $\square$
 The Chinese Remainder Theorem, can be rewritten as the following:
 $$\begin{aligned}
 \tau : &\mathbb{Z}_n \rightarrow \mathbb{Z}_{n_1} \times \cdots \times \mathbb{Z}_{n_k} \\
-        &a \longmapsto ([a]_{n_1}, \cdots, [a]_{n_k})\end{aligned}$$
+        &a \longmapsto ([a]_{n_1}, \cdots, [a]_{n_k})
+\end{aligned}$$
 
 Then $\tau$ is a bijection. The CRT proof also gives us a very simple
 algorithm to compute solutions for a system of congruences. The CRT can
 also help us to first compute a result $mod{p}$ and then $mod{q}$ and
-then $\mod{pq}$ if $\gcd{p,q} = 1$.
+then $\mod{pq}$ if $\gcd(p,q) = 1$.
 
 A very simple attack
 --------------------
 
 The Hadstadt's attacks is based on the following idea. Let's imagine
 that Bob wants to communicate with three of his friends, each of whom
-has its own public and private RSA key. Although, each of Bob's friends
-do have different public key, they are using the same public exponent
-$d = 3$ for encryption, or another low value. There is some incentive to
+has its own public and private RSA keys. Although, each of Bob's friend
+have different public keys, they are using the same public exponent
+$e = 3$ for encryption, or another low value. There is some incentive to
 use a small integer as a public exponent. It indeed lower the
 computational cost of encryption. Bob wants to tell them to meet at
 their favorite restaurant at 5 o'clock, by only sending the number 5
 encrypted, which is $5^3=125$. For any attacker, it is then easy to
 compute the third root of 125 and then recover the plaintext. So in this
 example, with a small public exponent, RSA is insecure for any key size
-chosen. Bob immediatly sees that but still wants to keep the cost of
+chosen. The exponentiation must "wrap around" the modulus for the
+encryption to be secure. 
+Bob immediatly sees that but still wants to keep the cost of
 encryption as small as possible. But he realizes that he needs the $m^3$
 bigger than any modulus $n_i$ used for encryption. Otherwise a simple
 and efficient third root computation is enough to recover the plaintext.
-But, even is Bob is doing that, RSA is still very much insecure for this
-setting due to Hadstadt broadcast attack.
+But, even if Bob is doing that, RSA is still very much insecure for this
+setting due to Hadstadt message broadcast attack.
 
 The attack
 ----------
 
 Let $c_i$ be the ciphertext for the i-ieth friend, and
 $c_i \equiv m^3 \mod{n}$. To explain, the attack one can suppose that
-none of the keys use any of the same primes. So all $n_i$ are relatively
+none of the keys use any of the same prime factor. So all $n_i$ are relatively
 prime to one another. Which looks a lot like the premises of the CRT. So
 there exist a $c$ which is a solution to the equations
 $x \equiv c_i \mod{n_i}$. And of course, as all
@@ -123,6 +132,8 @@ hadstadtAttack (c1, c2, c3) (n1, n2, n3) = integerCubeRoot c
 				where c = crt [n1, n2, n3] [c1, c2, c3]
 ```
 
+The same reasonning can be applied if the same message is sent to 17 persons, and $e = 17$.
+
 
 Conclusion
 ----------
@@ -135,3 +146,5 @@ prime number from the family of fermat's prime. Fermat's primes are of
 the form $2^{2^n} + 1$. This actually helps to optimize the modular
 exponentiation algorithm upon which is build the RSA scheme. But, the
 modular exponentiation and its algorithm deserve a post on their own.
+The code for mounting this attack is fairly simple, this explains why
+this attack is very often present in [CTFs](

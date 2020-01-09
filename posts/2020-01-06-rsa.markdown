@@ -42,42 +42,49 @@ The euler theorem or how to generate $e$ and $d$
 Let's define the [euler totient function](https://en.wikipedia.org/wiki/Euler's_totient_function) $\phi(n)$, it simply computes
 the number of positive integer inferior to $n$ that are coprime to $n$.
 This set of all coprime to $n$ is denoted $\mathbb{Z}_n^{*}$. In the
-case that $n$ is a prime number, the computation of $\phi(n)$ is easy, all
-the integer below $n$ are coprime to $n$, otherwise $n$ could not be
-prime. So, in that case $\phi(n) = p - 1$.
+case that $p$ is a prime number, the computation of $\phi(p)$ is easy, all
+the integer below $p$ are coprime to $p$, otherwise $p$ could not be
+prime. So, in that case $\phi(p) = p - 1$. Take 11 for example, as it
+is a prime number, it has no common factor with any integer below eleven
+(beside 1 which is the trivial factor), which makes 10 - 1 coprimes.
+Compared to 12, where each number divisible by both 2 and 3 has common factor with 12.
 
-And there is another neat fact about this function: $$\begin{aligned}
-    \forall a \in \mathbb{Z}_{n}^{*} \\
-    a^{\phi(n)} \equiv 1 \mod{n}\end{aligned}$$
+And there is another neat fact about this function:
+$$\begin{aligned}
+    \forall a \in \mathbb{Z}_{n}^{*}, a^{\phi(n)} \equiv 1 \mod{n}
+\end{aligned}$$
 
 #### proof
 
-Let $\mathbb{Z}_{n}^{*}$ the set of integers coprime to $\mathbb{Z}$ and
-$\alpha$ an element of that set. Let $\tau_{\alpha}$ be the map:
-$\tau_{\alpha}$ is a bijective map. 
+Let $\mathbb{Z}_{n}^{*}$ the set of integers coprime to $n$ and let
+$\alpha$ be an element of that set. Let $\tau_{\alpha}$ be the map (or function):
 $$\begin{aligned}
-            \mathbb{Z}_{n}^{*} \rightarrow \mathbb{Z}_{n}^{*} \\
-            \beta \longmapsto \alpha \beta
-    \end{aligned}$$
+	\mathbb{Z}_{n}^{*} \rightarrow \mathbb{Z}_{n}^{*} \\
+	\beta \longmapsto \alpha \beta
+\end{aligned}$$
+
+It is possible to prove that $\tau_{\alpha}$
+is a [bijective map](https://en.wikipedia.org/wiki/Bijection). 
 $$\begin{aligned}
         &\tau_{\alpha}(\beta) = \tau_{\alpha}(\gamma) \\
         \iff &\alpha \beta = \alpha \gamma \\
         \iff &\beta = \gamma \\
         \implies &\tau_{\alpha} injective \\
-    \end{aligned}$$ $$\begin{aligned}
+    \end{aligned}$$
+$$\begin{aligned}
         &\tau_{\alpha}(\alpha^{-1} \beta) = \alpha^{-1} \alpha \beta = \beta \\
         \implies &\tau_{\alpha} surjective
-    \end{aligned}$$
+\end{aligned}$$
 As $\tau_{\alpha}$ bijective, it means that this function has a
 one-to-one relation with each element of the input domain to the output domain.
 One easy conclusion from that is that there is the same number of element in
-the input and output domain, which si the result that helps prove the following statements:
+the input and output domains, which is the result that helps prove the following statements:
 $$\begin{aligned}
         &\displaystyle\prod_{\beta \in \mathbb{Z}_{n}^{*}} \tau_{\alpha}(\beta) = \displaystyle\prod_{\beta \in \mathbb{Z}_{n}^{*}} \beta \\
         \iff &\alpha^{\phi(n)} \displaystyle\prod_{\beta \in \mathbb{Z}_{n}^{*}} \beta =
         \displaystyle\prod_{\beta \in \mathbb{Z}_{n}^{*}} \beta \\
         \iff &\alpha^{\phi(n)} \equiv 1 \mod{n}
-    \end{aligned}$$
+\end{aligned}$$
 
 Moreover there is a neat formula to compute $\phi{n}$ if $p$, $q$ the
 unique factors of $n$ are known, $\phi{n} = (p - 1)(q - 1)$. Once
@@ -162,9 +169,9 @@ Conclusion
 I just described what is called the schoolbook RSA. In order to make
 that cryptographic scheme secure, many more elements and verification
 are needed. And I want to insist on that, using the RSA this way is
-grossly insecure. By the way some specialists are
+grossly insecure. By the way, some specialists are
 [advocating](https://blog.trailofbits.com/2019/07/08/fuck-rsa/) to move
 out from RSA (very strongly) as implementing a safe RSA system is a very hard feat.
  In the following posts, I will show and exploit some the
 weaknesses that the RSA cryptosystem can display. The first of these
-will be the [Hadstadt attack](./2020-01-06-hadstadt.html).
+will be the [Hadstadt's broadcast message attack](./2020-01-06-hadstadt.html).
