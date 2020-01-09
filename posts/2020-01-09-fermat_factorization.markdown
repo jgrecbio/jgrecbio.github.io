@@ -1,6 +1,5 @@
 ---
-title: Paillier Encryption Scheme for Encrypted Machine Learning
-  Inference
+title: The Fermat's Factorization attack
 ---
 
 The fermat's factorization method
