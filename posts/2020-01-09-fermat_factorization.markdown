@@ -76,25 +76,25 @@ decide to select $p$ and $q$ with the following method.
 generate_p_q(key_size):
     repeat until p.is_prime():
         p <- random(2^(key_size), 2^(key_size + 1))
-	repeat until q.is_prime():
+    repeat until q.is_prime():
         q <- p + 2
     return (p, q)
 ```
 
 This implementation will invevitably creates primes with very small differences,
 which will be subject to femat's factorization method. It is another example
-of the principle that you should not roll your own cryptography.
+of the principle that you should not roll your own cryptography primitives.
 
-Speeding the fermat's factorization method
-==========================================
+Conclusion
+==========
 
 In the previous example the number of iterations to find $p$ and $q$
 was rather low, but even though the differences between the two
 primes is low, the amount of computations required with this
 naive algorithm may be very important.
 For example for $n = 2462649746477364143454082050368305440553491900304388646893610847386194301369924385009730987303651345060031438478297733694036327257723431468649220444397635127530301992505638291521092898714917678389314956983918603221732358628680256253537449204312287724750669208856634711056863315465220853759428826555838536733$,
-it requires 26365624027328 iterations, so my little haskell programm would probably takes month
+it requires 26365624027328 iterations, so my little haskell programm would probably takes months
 to solve it. I could try to distribute the computation over many processors, but it
-would still take a lot of time and cost a few thousand bucks. So
-maybe we can use some simple modular algebra tricks to speed up
-fermat's factorization.
+would still take a lot of time and cost a few thousand bucks.
+There are some tricks to speed up the fermat's factorization,
+which will be the subject of a later post.
