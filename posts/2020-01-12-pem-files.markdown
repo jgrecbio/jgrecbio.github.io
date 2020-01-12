@@ -1,0 +1,60 @@
+---
+title: Handling pem files
+---
+
+For the curious mind, there is a lot of ressources for learning
+the nuts and bolts of computer security. There is a peculiar type
+of ressource which makes the learning very fun:
+[CTFs](https://en.wikipedia.org/wiki/Capture_the_flag#Computer_security) (Capture the flag).
+The idea is rather simple, one creates an example of an implementation
+which is compromised and invite others to come and try to break it.
+And as you can expect, there are a lot of CTFs on the RSA crytosystems
+(one can look [here](https://cryptopals.com/sets/6),
+[there](https://id0-rsa.pub/) and [there](https://ctftime.org/writeup/7463))
+and some of them can be broken with the factorization methods I wrote
+about. But usually, these challenges do not directly display the
+public key but rather make available a pem file, which is one
+the standard for key serialization and file distribution. I will
+not enter into the [technicalities](https://medium.com/@bn121rajesh/understanding-rsa-public-key-70d900b1033c)
+ on the encoding of pem files, which
+I find a bit boring, but I will rather show how to handle such files
+and how to get the moduli $n$ and the public exponent $e$.
+
+On Python
+=========
+
+On python this is actually very simple thanks to the
+[pycrypto](https://github.com/dlitz/pycrypto) library.
+
+```python
+from Crypto.PublicKey.RSA import importKey
+
+with open("/path/to/your/pem/file.pem") as f:
+	key = importKey(f.read())
+n = getattr(key, n)
+e = getattr(key, e)
+
+with open("/path/to/new/pem/file.pem", "w") as f:
+	f.write(key.exportKey())
+```
+
+On Haskell
+==========
+
+I will admit that I did not find a workflow as simple as in python.
+The simplest method I found was to rely on a
+[openssl bindings](https://hackage.haskell.org/package/HsOpenSSL) in
+haskell. To note, you will need to supply to your stack configuration
+the location of your openssl libray.
+
+```haskell
+key <- readPublicKey "/path/to/your/file.pem"
+let pubkey = toPublicKey key
+    n = fmap rsaN pubkey
+	e = fmap rsaE pubkey
+```
+
+Conclusion
+==========
+
+Once $n$, $e$ are fetched, the CTF's fun can begin.
