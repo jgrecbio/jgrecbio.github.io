@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>Harpocrate's adventuresHandling pem files</title>
+        <link rel="stylesheet" type="text/css" href="../css/default.css" />
+		<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+		<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    </head>
+    <body>
+        <div id="header">
+            <div id="logo">
+                <a href="../">Harpocrate's adventures</a>
+            </div>
+            <div id="navigation">
+                <a href="../">Home</a>
+                <a href="../about.html">About</a>
+                <a href="../contact.html">Contact</a>
+                <a href="../archive.html">Archive</a>
+            </div>
+        </div>
+
+        <div id="content">
+            <h1>Handling pem files</h1>
+
+            <div class="info">
+    Posted on January 12, 2020
+    
+</div>
+
+<p>For the curious mind, there is a lot of ressources for learning the nuts and bolts of computer security. There is a peculiar type of ressource which makes the learning very fun: <a href="https://en.wikipedia.org/wiki/Capture_the_flag#Computer_security">CTFs</a> (Capture the flag). The idea is rather simple, one creates an example of an implementation which is compromised and invite others to come and try to break it. And as you can expect, there are a lot of CTFs on the RSA crytosystems (one can look <a href="https://cryptopals.com/sets/6">here</a>, <a href="https://id0-rsa.pub/">there</a> and <a href="https://ctftime.org/writeup/7463">there</a>) and some of them can be broken with the factorization methods I wrote about. But usually, these challenges do not directly display the public key but rather make available a pem file, which is one the standard for key serialization and file distribution. I will not enter into the <a href="https://medium.com/@bn121rajesh/understanding-rsa-public-key-70d900b1033c">technicalities</a> on the encoding of pem files, which I find a bit boring, but I will rather show how to handle such files and how to get the moduli <span class="math inline"><em>n</em></span> and the public exponent <span class="math inline"><em>e</em></span>.</p>
+<h1 id="on-python">On Python</h1>
+<p>On python this is actually very simple thanks to the <a href="https://github.com/dlitz/pycrypto">pycrypto</a> library.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><a class="sourceLine" id="cb1-1" title="1"><span class="im">from</span> Crypto.PublicKey.RSA <span class="im">import</span> importKey</a>
+<a class="sourceLine" id="cb1-2" title="2"></a>
+<a class="sourceLine" id="cb1-3" title="3"><span class="cf">with</span> <span class="bu">open</span>(<span class="st">&quot;/path/to/your/pem/file.pem&quot;</span>) <span class="im">as</span> f:</a>
+<a class="sourceLine" id="cb1-4" title="4">	key <span class="op">=</span> importKey(f.read())</a>
+<a class="sourceLine" id="cb1-5" title="5">n <span class="op">=</span> <span class="bu">getattr</span>(key, n)</a>
+<a class="sourceLine" id="cb1-6" title="6">e <span class="op">=</span> <span class="bu">getattr</span>(key, e)</a>
+<a class="sourceLine" id="cb1-7" title="7"></a>
+<a class="sourceLine" id="cb1-8" title="8"><span class="cf">with</span> <span class="bu">open</span>(<span class="st">&quot;/path/to/new/pem/file.pem&quot;</span>, <span class="st">&quot;w&quot;</span>) <span class="im">as</span> f:</a>
+<a class="sourceLine" id="cb1-9" title="9">	f.write(key.exportKey())</a></code></pre></div>
+<h1 id="on-haskell">On Haskell</h1>
+<p>I will admit that I did not find a workflow as simple as in python. The simplest method I found was to rely on a <a href="https://hackage.haskell.org/package/HsOpenSSL">openssl bindings</a> in haskell. To note, you will need to supply to your stack configuration the location of your openssl libray.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb2-1" title="1">key <span class="ot">&lt;-</span> readPublicKey <span class="st">&quot;/path/to/your/file.pem&quot;</span></a>
+<a class="sourceLine" id="cb2-2" title="2"><span class="kw">let</span> pubkey <span class="fu">=</span> toPublicKey key</a>
+<a class="sourceLine" id="cb2-3" title="3">    n <span class="fu">=</span> <span class="fu">fmap</span> rsaN pubkey</a>
+<a class="sourceLine" id="cb2-4" title="4">	e <span class="fu">=</span> <span class="fu">fmap</span> rsaE pubkey</a></code></pre></div>
+<h1 id="conclusion">Conclusion</h1>
+<p>Once <span class="math inline"><em>n</em></span>, <span class="math inline"><em>e</em></span> are fetched, the CTF’s fun can begin.</p>
+
+        </div>
+        <div id="footer">
+            Site proudly generated by
+           <a href="http://jaspervdj.be/hakyll">Hakyll</a>
+        </div>
+    </body>
+</html>
