@@ -2,8 +2,7 @@
 title: An Introduction for the RSA cryptosystem
 ---
 
-*This article will assume that the reader has some knowledge of modular
-arithmetic and is comfortable with [modulo operations](https://en.wikipedia.org/wiki/Modulo_operation),
+*This article will assume that the reader has some knowledge of modular arithmetic and is comfortable with [modulo operations](https://en.wikipedia.org/wiki/Modulo_operation),
 [GCD](https://en.wikipedia.org/wiki/Greatest_common_divisor), the notion of
 [coprime integers](https://en.wikipedia.org/wiki/Modular_inverse)
 and of [prime numbers](https://en.wikipedia.org/wiki/Prime_number). Here I want to
@@ -86,8 +85,8 @@ $$\begin{aligned}
         \iff &\alpha^{\phi(n)} \equiv 1 \mod{n}
 \end{aligned}$$
 
-Moreover there is a neat formula to compute $\phi{n}$ if $p$, $q$ the
-unique factors of $n$ are known, $\phi{n} = (p - 1)(q - 1)$. Once
+Moreover there is a neat formula to compute $\phi(n)$ if $p$, $q$ the
+unique factors of $n$ are known, $\phi(n) = (p - 1)(q - 1)$. Once
 $\phi(n)$ is known, once can select an invertible integer $e$ in
 $\mathbb{Z}_{\phi(n)}^{*}$ and let $d$ be its unique inverse in
 $\mathbb{Z}_{\phi(n)}^{*}$.
