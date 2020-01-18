@@ -91,8 +91,8 @@ $\phi(n)$ is known, once can select an invertible integer $e$ in
 $\mathbb{Z}_{\phi(n)}^{*}$ and let $d$ be its unique inverse in
 $\mathbb{Z}_{\phi(n)}^{*}$.
 By definition
-$ed \equiv 1 \mod{\phi(n)} \iff ed = k\phi(n) + 1$. So let
-$a \in \mathbb{Z}_{n}^{*}$, then $a^{k\phi(n) + 1} \equiv a \mod{n}$,
+$ed \equiv 1 \mod{\phi(n)} \iff ed = k\phi(n) + 1$, for some $k$. So let
+$a \in \mathbb{Z}_{n}^{*}$, then $a^{k\phi(n) + 1} \equiv (a^{\phi(n)})^k \times a \equiv a \mod{n}$,
 which shows that the decryption process works if $a$ is invertible. What
 if it is not the case:
 

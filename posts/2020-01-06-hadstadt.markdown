@@ -41,7 +41,7 @@ The Chinese Remainder Theorem
 
 #### Theorem
 
-Let $\{a_i\}_{i=1}^{k}$ be a set of arbitrary integers and
+Let $\{a_i\}^k_{i=1}$ be a set of arbitrary integers and
 $\{n_i\}_{i=1}^{k}$ be a set of relatively prime integer. Then there
 exist an integer $a$ such a that:
 $a \equiv a_i \mod n_i : \forall i \in {1, \ldots, k}$. Moreover, $a'$
@@ -58,7 +58,7 @@ $e_i \equiv 1 \mod n_i$ and $e_i \equiv 0 \mod n_j$. So the sum of
 $a_i e_i$ is a solution. If $a' \equiv a \mod{n}$ then:
 
 $$\begin{aligned}
-\iff &a - a' = 1 + k \prod_{i=1}^{k} n_i \\
+&a - a' = 1 + k \prod_{i=1}^{k} n_i \\
 \iff &a \equiv a' \mod{n_i}
 \end{aligned}$$
 
@@ -72,10 +72,15 @@ $$\begin{aligned}
         &a \longmapsto ([a]_{n_1}, \cdots, [a]_{n_k})
 \end{aligned}$$
 
-Then $\tau$ is a bijection. The CRT proof also gives us a very simple
+Then $\tau$ is a bijection. This statement is important because it implies
+that there only one integer in $\mathbb{Z}_n$, which satisfy the set of
+equations $a \equiv a_i \mod{n_i}$, for all i. The CRT proof also gives us a very simple
 algorithm to compute solutions for a system of congruences. The CRT can
-also help us to first compute a result $mod{p}$ and then $mod{q}$ and
-then $\mod{pq}$ if $\gcd(p,q) = 1$.
+also help us to first compute a result $\mod{p}$ and then $\mod{q}$ and
+then $\mod{pq}$, given that $\gcd(p,q) = 1$. In the case of RSA, $p$ and
+$q$ are prime, so they are also coprimes, if they are different. We will see
+in more details, that it is possible to use the RSA to perform RSA decryption
+almost 4 times faster. But it can lead to security risk if it is done improperly.
 
 A very simple attack
 --------------------
