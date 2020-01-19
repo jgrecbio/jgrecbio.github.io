@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>Harpocrate's adventuresThe RSA-CRT optimization pitfalls</title>
+        <link rel="stylesheet" type="text/css" href="../css/default.css" />
+		<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+		<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    </head>
+    <body>
+        <div id="header">
+            <div id="logo">
+                <a href="../">Harpocrate's adventures</a>
+            </div>
+            <div id="navigation">
+                <a href="../">Home</a>
+                <a href="../about.html">About</a>
+                <a href="../contact.html">Contact</a>
+                <a href="../archive.html">Archive</a>
+            </div>
+        </div>
+
+        <div id="content">
+            <h1>The RSA-CRT optimization pitfalls</h1>
+
+            <div class="info">
+    Posted on January 18, 2020
+    
+</div>
+
+<p><em>this post will assume that the reader is confortable with congruences and with the CRT, a quick refresher can be found here. In this post, I will use extensively the CRT, for avoid un-necessary computations, but also to prove several mathematical propositions. This back and forth in computation <span class="math inline">mod <em>n</em></span>, and <span class="math inline">mod <em>p</em></span> then <span class="math inline">mod <em>q</em></span> may be a bit hard to follow sometimes.</em></p>
+<p>As I wrote in the <a href="./2020-01-05-rsa.html">introduction</a> of the mathematics of RSA, this cryptosystem relies on the possibility to perform efficiently modular expoentiation. The security of RSA is based on the impossibility to compute efficiently the inverse of this algorithm. Altough modular exponentiation computation is somewhat efficient, this algorithm is still costly, <span class="math inline"><em>O</em>(<em>l</em><em>o</em><em>g</em>(<em>e</em>))</span> for <span class="math inline"><em>e</em></span> the exponent. In the case of RSA, that cost is typically payed during the decryption process. Remember, the public key <span class="math inline"><em>e</em></span> — the public exponent — is typically a small integer, often equal to 3, 17 or 65537. Although, 3 and 17 are deemed unsafe, as I wrote about on the <a href="./2020-01-06-hadstadt.html">hadstadt’s attack</a>. Whereas the private exponent <span class="math inline"><em>d</em></span>, the inverse of <span class="math inline"><em>e</em>mod <em>ϕ</em>(<em>n</em>)</span>, is a much higher number, so the decryption is the more demanding task, by a long shot. That is the reason why the it is tempting to optimize the RSA cryptosystem for that step.</p>
+<h1 id="the-crt-to-the-rescue">The CRT to the rescue</h1>
+<p>The <a href="https://en.wikipedia.org/wiki/Chinese_remainder_theorem">CRT</a> is wonderful algorithm wich helps to perform computation <span class="math inline">mod <em>n</em></span>, <span class="math inline"><em>n</em> = <em>p</em><em>q</em></span>, by first computating <span class="math inline">mod <em>p</em></span> and then <span class="math inline">mod <em>q</em></span>, provided that <span class="math inline"><em>p</em></span> and <span class="math inline"><em>q</em></span> are coprime, of course. So to optimize the RSA decryption on a ciphertext <span class="math inline"><em>c</em></span>, one could compute <span class="math inline"><em>c</em><sup><em>d</em></sup>mod <em>p</em></span> and <span class="math inline"><em>c</em><sup><em>d</em></sup>mod <em>q</em></span>.</p>
+<h2 id="modular-exponentiation-and-the-little-fermat-theorem">Modular exponentiation and the little fermat theorem</h2>
+<p>But, here the fermat little theorem gives us another trick to optimize the decryption runtime. The little fermat theorem states (<a href="./2020-01-05-rsa.html">proof here</a>, can be proven as a corrolary of the <a href="https://en.wikipedia.org/wiki/Euler_theorem">euler theorem</a>) that: if <span class="math inline"><em>p</em></span> is a prime number, and <span class="math inline"><em>g</em></span> a unit (meaning a number coprime to <span class="math inline"><em>p</em></span>), then: <br /><span class="math display">$$\begin{aligned}
+	g^{p - 1} \equiv 1 \mod{p} \\
+\end{aligned}$$</span><br /></p>
+<p>So let start to compute the euclidian division of <span class="math inline"><em>d</em></span> by <span class="math inline"><em>p</em> − 1</span>. <br /><span class="math display">$$\begin{aligned}
+	d &amp;= k(p - 1) + c_d \\
+	c^d &amp;\equiv (c^{p - 1})^k \times c^{c_d} \mod{p} \\
+	   	&amp;\equiv 1^k \times c^{c_d} \equiv c^{c_d} \mod{p}
+\end{aligned}$$</span><br /> As you may notice, computing the modular exponentiation <span class="math inline">mod <em>p</em></span>, can be done by first computation the exponent <span class="math inline">mod <em>p</em> − 1</span>, which make the computation much faster.</p>
+<p>By the way, the little fermat theorem also gives us a neat way to compute inverses <span class="math inline">mod <em>p</em></span>. Indeed <span class="math inline"><em>a</em><sup><em>p</em> − 2</sup> × <em>a</em> ≡ 1mod <em>p</em></span>.</p>
+<h2 id="the-crt-speed-up">The CRT speed up</h2>
+<p>Let <span class="math inline"><em>c</em><sub><em>p</em></sub> ≡ <em>c</em><sup><em>d</em></sup>mod <em>p</em></span> and <span class="math inline"><em>c</em><sub><em>q</em></sub> ≡ <em>c</em><sup><em>d</em></sup>mod <em>q</em></span>, computed with the little fermat trick, I just wrote about a few lines above. Once these two quantities are computed, one can perform the last computation <span class="math inline">mod <em>n</em></span>, with the CRT. <br /><span class="math display">$$\begin{aligned}
+	c^d \equiv c_q \times q \times q^{-1}_{p} + c_p \times p \times p^{-1}_{q} \mod{n}
+\end{aligned}$$</span><br /></p>
+<p>It is of interest to note that <span class="math inline"><em>q</em> × <em>q</em><sub><em>p</em></sub><sup> − 1</sup></span> and its counterpart <span class="math inline">mod <em>p</em></span> can be computed in advance and cached.</p>
+<h2 id="one-last-ace-under-the-sleeve">One last ace under the sleeve</h2>
+<p>But there is a last way to optimize the computation. Indeed, one can notice that <span class="math inline"><em>p</em> × <em>p</em><sub><em>q</em></sub><sup> − 1</sup> ≡ (1 − <em>q</em> × <em>q</em><sub><em>p</em></sub><sup> − 1</sup>)mod <em>n</em></span>. To prove this last statement, one must compute it <span class="math inline">mod <em>p</em></span> and <span class="math inline">mod <em>q</em></span> and by the CRT. The fact that is true is automatic. Once this has been noticed:</p>
+<p><br /><span class="math display">$$\begin{aligned}
+	m \equiv c^d \equiv c_p + q \times q^{-1}_p (c_q - c_p) \mod{n} \\
+\end{aligned}$$</span><br /> To prove that <span class="math inline"><em>m</em></span> is indeed the corresponding plaintext, the CRT can be used to prove that <span class="math inline"><em>m</em> ≡ <em>c</em><sub><em>p</em></sub>mod <em>p</em></span> and <span class="math inline"><em>m</em> ≡ <em>c</em><sub><em>q</em></sub>mod <em>q</em></span>.</p>
+<p><br /><span class="math display">$$\begin{aligned}
+	m &amp;\equiv c_p + q \times q^{-1}_p (c_q - c_p) \mod{p} \\
+	  &amp;\equiv c_p + 1 \times (c_q - c_p) \mod{p} \\
+	  &amp;\equiv c_q \mod{p}
+\end{aligned}$$</span><br /> So: <br /><span class="math display">$$\begin{aligned}
+	m &amp;\equiv c_p + q \times q^{-1}_p (c_q - c_p) \mod{q} \\
+	  &amp;\equiv c_p \mod{q} \square
+\end{aligned}$$</span><br /></p>
+<p>The advantage of this method is that the computation of <span class="math inline"><em>q</em> × <em>q</em><sub><em>q</em></sub><sup> − 1</sup></span> is needed whereas <span class="math inline"><em>p</em> × <em>p</em> − 1<sub><em>q</em></sub></span> is no longer needed.</p>
+<h2 id="optimization-summary">Optimization summary</h2>
+<p>In order:</p>
+<ol type="1">
+<li>computes <span class="math inline"><em>d</em><sub><em>p</em></sub> ≡ <em>d</em>mod <em>p</em> − 1</span></li>
+<li>computes <span class="math inline"><em>d</em><sub><em>q</em></sub> ≡ <em>d</em>mod <em>q</em> − 1</span></li>
+<li>computes <span class="math inline"><em>c</em><sub><em>p</em></sub> ≡ <em>c</em><sup><em>d</em><sub><em>p</em></sub></sup>mod <em>p</em></span></li>
+<li>computes <span class="math inline"><em>c</em><sub><em>q</em></sub> ≡ <em>c</em><sup><em>d</em><sub><em>q</em></sub></sup>mod <em>q</em></span></li>
+<li>computes <span class="math inline"><em>h</em> ≡ <em>q</em><sub><em>p</em></sub><sup> − 1</sup>(<em>c</em><sub><em>p</em></sub> − <em>c</em><sub><em>q</em></sub>)</span></li>
+<li>computes <span class="math inline"><em>m</em> ≡ <em>c</em><sub><em>q</em></sub> × <em>q</em><em>h</em></span></li>
+</ol>
+<p>With these steps, it is almost possible to get the decryption process 4 times faster than computation <span class="math inline">mod <em>n</em></span>.</p>
+<h1 id="optimization-as-the-root-of-all-evil">Optimization as the root of all evil</h1>
+<p>When I was growing up, I was often told that the road to hell is paved by good intentions (catholics are often deontologist). I’m sure the translation of that maxim, in computer-science, is that premature or improper optimization leads to computational hell, and not just for deontologists. Also something I learned recently, is that <a href="https://cryptopals.com/">hell is coming</a> very fast for the un-cautious cryptographer, as it is very simple to write seemingly secure, but fondamentally insecure in practice. In fact, an error in the CRT algorithm can even allow an attacker to retrive the factors of <span class="math inline"><em>n</em></span>! To explain why, I will start by explaining the use of <a href="https://en.wikipedia.org/wiki/Digital_signature">digital signatures</a> and how you can implement a very simple RSA signature scheme, of course optimized with the CRT.</p>
+<h2 id="rsa-and-digital-signatures">RSA and Digital Signatures</h2>
+<p>Let imagine that you want to prove that a given message you just wrote has indeed been wrote by yourself. In a way you want to digitally sign it. Of course, so that the signature is useful, only you should be able to create a valid signature. The asymetry of the RSA cryptosystem can help to achieve such a feat. Remember, in RSA, <span class="math inline">(<em>e</em>, <em>n</em>)</span> is your public key and <span class="math inline"><em>d</em></span> is the private key. Also, for any integer <span class="math inline"><em>a</em></span> between <span class="math inline">0, ⋯, <em>n</em> − 1</span>, <span class="math inline"><em>a</em><sup><em>e</em><em>d</em></sup> ≡ 1mod <em>n</em></span>.</p>
+<p>So imagine, you would like to prove that you wrote the message <span class="math inline"><em>m</em></span>. What you could do is to compute <span class="math inline"><em>s</em> ≡ <em>m</em><sup><em>d</em></sup>mod <em>n</em></span>. And send it to someone, along with <span class="math inline"><em>s</em></span>, let say that someone is called Alice. Now Alice wants to verify if that message come from you (imagine you are named Bob). Alice only has to compute <span class="math inline"><em>x</em>′ ≡ <em>s</em><sup><em>e</em></sup>mod <em>n</em></span> and verify that <span class="math inline"><em>x</em>′ = <em>x</em></span>. By the way it also provides a non-repudiation service for Alice. Indeed, as Bob is the only one with access to the private key, Alice can prove that <span class="math inline"><em>x</em></span> comes from Bob.</p>
+<h2 id="a-faulty-signature">A faulty signature</h2>
+<p>But signing a document with schoolbook RSA is computationnally expensive, it needs exponentiation by the private exponent <span class="math inline"><em>d</em></span>, typically a big integer. So there is an incentive to use the CRT-optimization of RSA.</p>
+<p>So now, bob is computing <span class="math inline"><em>s</em> ≡ <em>c</em><sub><em>q</em></sub> + <em>q</em><em>h</em>mod <em>n</em></span>. But imagine, that for some unfortunate reason, an error occurs either in the computation of <span class="math inline"><em>c</em><sub><em>q</em></sub></span> or <span class="math inline"><em>q</em><em>h</em></span>, but only in one them. And that error renders that <span class="math inline"><em>c</em><sub><em>q</em></sub></span> or <span class="math inline"><em>q</em><em>h</em></span> is equivalent to 0.</p>
+<p>#H3 <span class="math inline"><em>h</em><em>q</em> = 0</span></p>
+<p>So <span class="math inline"><em>s</em> ≡ <em>c</em><sub><em>q</em></sub>mod <em>n</em></span>. We know that for some integer <span class="math inline"><em>k</em></span>, <span class="math inline"><em>d</em> = <em>k</em>(<em>q</em> − 1) + <em>c</em><sub><em>q</em></sub></span>. So <span class="math inline"><em>c</em><sub><em>q</em></sub> = <em>d</em> − <em>k</em>(<em>q</em> − 1)</span>. Let make computation in <span class="math inline">mod <em>q</em></span>. <br /><span class="math display">$$\begin{aligned}
+	c_q &amp;\equiv m^{d_q} \mod{n} \\
+	\iff	&amp;\equiv m^{d} \times (m^{q-1})^{-k} \mod{q} \\
+	\iff c_q^e &amp;\equiv (m^{d})^e \mod{q} \\
+			\iff c_q^e &amp;\equiv m \mod{q}
+\end{aligned}$$</span><br /> So <span class="math inline"><em>c</em><sub><em>q</em></sub><sup><em>e</em></sup> − <em>m</em></span> is divisible by <span class="math inline"><em>q</em></span>, so <span class="math inline"><em>c</em><sub><em>q</em></sub><sup><em>e</em></sup> − <em>m</em></span> and <span class="math inline"><em>n</em></span> shares a common factor, which can be retrieved by <span class="math inline">gcd (<em>c</em><sub><em>q</em></sub><sup><em>e</em></sup> − <em>m</em>, <em>n</em>)</span>. So as you can observe, if there is an error with the CRT optimization, it is possible to retrieve a factor of <span class="math inline"><em>n</em></span>. One can apply the same reasonning with <span class="math inline"><em>c</em><sub><em>p</em></sub></span>, <span class="math inline">mod <em>p</em></span>, a good exercice by the way.</p>
+<h2 id="a-simple-mitigation-that-nobody-does">A simple mitigation … that nobody does</h2>
+<p>To be sure of digital signature is quite simple in that case. You just have to check whether or not the signature <span class="math inline"><em>s</em></span> of the message <span class="math inline"><em>m</em></span> satisfy <span class="math inline"><em>s</em><sup><em>e</em></sup> ≡ <em>m</em>mod <em>n</em></span>. If it is not the case, then there have been an error in your computation. Either due to the design of your implementation, a fault in the processor or some attack on the hardware that performs the computations.</p>
+<p>You can find here[1], a very interesting paper, that shows this type of fault can actually happen very often during the handshake of TLS, and a lot a cryptographic API do not perform that sanity check by default. Another more general paper about the consequences of errors in cryptograph can be found there[2].</p>
+<h1 id="conclusion">Conclusion</h1>
+<p>This article is barely a decent introduction to the concept of digital signatures, and how ubiquitous and important they are in our current digital world. It is important to stress out that without digital signatures, the internet as we know it would not exist, as we could not know who would be the real recipient of any sent/received data. Therefore, e-commerce would not exist, mail system would useless, etc…</p>
+<p>Another lesson one could try to derive from this, is the importance of the CRT in cryptography. This algorithm is both a great tool to optmize computation in RSA but also in many other cryptosystems, even the post-quantum cryptographic schemes. But beware, the CRT can also be used for cryptanalysis, as we saw in one of the <a href="./2020-01-06-hadstadt.html">previous post</a>.</p>
+<h1 id="references">References</h1>
+<p>[1] Weimer, F. (2015). Factoring RSA Keys With TLS Perfect Forward Secrecy.</p>
+<p>[2] Boneh, D., DeMillo, R. A., &amp; Lipton, R. J. (2001). On the importance of eliminating errors in cryptographic computations. Journal of cryptology, 14(2), 101-119.</p>
+
+        </div>
+        <div id="footer">
+            Site proudly generated by
+           <a href="http://jaspervdj.be/hakyll">Hakyll</a>
+        </div>
+    </body>
+</html>
