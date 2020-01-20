@@ -1,0 +1,229 @@
+---
+title: The RSA-CRT optimization pitfalls
+---
+*this post will assume that the reader is confortable with
+congruences and with the CRT, a quick refresher can be
+found here. In this post, I will use extensively the CRT, for
+avoid un-necessary computations, but also to prove
+several mathematical propositions. This back and forth
+in computation $\mod{n}$, and $\mod{p}$ then $\mod{q}$ may be
+a bit hard to follow sometimes.*
+
+As I wrote in the [introduction](./2020-01-05-rsa.html)
+of the mathematics of RSA,
+this cryptosystem relies on the possibility to perform
+efficiently modular expoentiation. The security of RSA is based
+on the impossibility to compute efficiently the inverse of
+this algorithm. Altough modular exponentiation computation is somewhat efficient,
+this algorithm is still costly, $O(log(e))$ for $e$ the exponent.
+In the case of RSA, that cost is typically payed during the
+decryption process. Remember, the public key $e$ --- the public
+exponent --- is typically a small integer, often equal to 3, 17 or
+65537. Although, 3 and 17 are deemed unsafe, as I wrote about on
+the [hadstadt's attack](./2020-01-06-hadstadt.html).
+Whereas the private exponent $d$, the inverse
+of $e \mod{\phi(n)}$, is a much higher number, so the decryption
+is the more demanding task, by a long shot. That is the reason
+why the it is tempting to optimize the RSA cryptosystem for
+that step.
+
+The CRT to the rescue
+=====================
+
+The [CRT](https://en.wikipedia.org/wiki/Chinese_remainder_theorem)
+is wonderful algorithm wich helps to perform computation $\mod{n}$, $n = pq$,
+by first computating $\mod{p}$ and then $\mod{q}$, provided that
+$p$ and $q$ are coprime, of course. So to optimize the RSA decryption on a 
+ciphertext $c$, one could compute $c^d \mod{p}$ and $c^d \mod{q}$.
+
+Modular exponentiation and the little fermat theorem
+----------------------------------------------------
+
+But, here the fermat little theorem gives us another trick to optimize
+the decryption runtime. The little fermat theorem states
+([proof here](./2020-01-05-rsa.html), can be proven as a corrolary
+of the [euler theorem](https://en.wikipedia.org/wiki/Euler_theorem)) that:
+if $p$ is a prime number, and $g$ a unit (meaning a number coprime to $p$), then:
+$$\begin{aligned}
+	g^{p - 1} \equiv 1 \mod{p} \\
+\end{aligned}$$
+
+So let start to compute the euclidian division of $d$ by $p - 1$.
+$$\begin{aligned}
+	d &= k(p - 1) + c_d \\
+	c^d &\equiv (c^{p - 1})^k \times c^{c_d} \mod{p} \\
+	   	&\equiv 1^k \times c^{c_d} \equiv c^{c_d} \mod{p}
+\end{aligned}$$
+As you may notice, computing the modular exponentiation $\mod{p}$,
+can be done by first computation the exponent $\mod{p - 1}$, which
+make the computation much faster.
+
+By the way, the little fermat theorem also gives us a neat way to
+compute inverses $\mod{p}$. Indeed $a^{p - 2} \times a \equiv 1 \mod{p}$.
+
+The CRT speed up
+----------------
+
+Let $c_p \equiv c^d \mod{p}$ and $c_q \equiv c^d \mod{q}$, computed
+with the little fermat trick, I just wrote about a few lines above. Once these two
+quantities are computed, one can perform the last computation $\mod{n}$,
+with the CRT.
+$$\begin{aligned}
+	c^d \equiv c_q \times q \times q^{-1}_{p} + c_p \times p \times p^{-1}_{q} \mod{n}
+\end{aligned}$$
+
+It is of interest to note that $q\times q^{-1}_p$ and its counterpart $\mod{p}$ can be
+computed in advance and cached.
+
+One last ace under the sleeve
+-----------------------------
+
+But there is a last way to optimize the computation. Indeed, one can notice
+that $p \times p^{-1}_q \equiv (1 - q \times q^{-1}_p) \mod{n}$. To prove
+this last statement, one must compute it $\mod{p}$ and $\mod{q}$ and by
+the CRT. The fact that is true is automatic. Once this has been noticed:
+
+$$\begin{aligned}
+	m \equiv c^d \equiv c_p + q \times q^{-1}_p (c_q - c_p) \mod{n} \\
+\end{aligned}$$
+To prove that $m$ is indeed the corresponding plaintext, the CRT
+can be used to prove that $m \equiv c_p \mod{p}$ and $m \equiv c_q \mod{q}$.
+
+$$\begin{aligned}
+	m &\equiv c_p + q \times q^{-1}_p (c_q - c_p) \mod{p} \\
+	  &\equiv c_p + 1 \times (c_q - c_p) \mod{p} \\
+	  &\equiv c_q \mod{p}
+\end{aligned}$$
+So:
+$$\begin{aligned}
+	m &\equiv c_p + q \times q^{-1}_p (c_q - c_p) \mod{q} \\
+	  &\equiv c_p \mod{q} \square
+\end{aligned}$$
+
+The advantage of this method is that the computation of
+$q  \times q^{-1}_q$ is needed whereas $p \times p{-1}_q$
+is no longer needed.
+
+Optimization summary
+--------------------
+
+In order:
+
+1. computes $d_p \equiv d \mod{p - 1}$
+2. computes $d_q \equiv d \mod{q - 1}$
+3. computes $c_p \equiv c^{d_p} \mod p$
+4. computes $c_q \equiv c^{d_q} \mod q$
+5. computes $h \equiv q^{-1}_p (c_p - c_q)$
+6. computes $m \equiv c_q \times qh$
+
+With these steps, it is almost possible to get the decryption
+process 4 times faster than computation $\mod{n}$.
+
+Optimization as the root of all evil
+====================================
+
+When I was growing up, I was often told that the road to
+hell is paved by good intentions (catholics are often deontologist).
+I'm sure the translation of that maxim, in computer-science, is that
+premature or improper optimization leads to computational hell,
+and not just for deontologists. Also something I learned recently,
+is that [hell is coming](https://cryptopals.com/) very fast for the un-cautious cryptographer,
+as it is very simple to write seemingly secure, but fondamentally insecure
+in practice. In fact, an error in the
+CRT algorithm can even allow an attacker to retrive the factors
+of $n$!  To explain why, I will start by explaining the use of
+[digital signatures](https://en.wikipedia.org/wiki/Digital_signature)
+and how you can implement a very simple RSA signature
+scheme, of course optimized with the CRT.
+
+RSA and Digital Signatures
+--------------------------
+
+Let imagine that you want to prove that a given message you
+just wrote has indeed been wrote by yourself. In a way you want to 
+digitally sign it. Of course, so that the signature is useful,
+only you should be able to create
+a valid signature. The asymetry of the RSA cryptosystem can
+help to achieve such a feat. Remember, in RSA, $(e, n)$ is your 
+public key and $d$ is the private key. Also, for any integer $a$
+between $0, \cdots, n - 1$, $a^{ed} \equiv 1 \mod{n}$.
+
+So imagine, you would like to prove that you wrote the message $m$.
+What you could do is to compute $s \equiv m^d \mod{n}$. And send
+it to someone, along with $s$, let say that someone is called Alice. 
+Now Alice wants to verify if that message come from you (imagine
+you are named Bob). Alice only has to compute $x' \equiv s^e \mod{n}$
+and verify that $x' = x$. By the way it also provides a non-repudiation
+service for Alice. Indeed, as Bob is the only one with access to the
+private key, Alice can prove that $x$ comes from Bob.
+
+A faulty signature
+------------------
+
+But signing a document with schoolbook RSA is computationnally expensive,
+it needs exponentiation by the private exponent $d$, typically a big integer.
+So there is an incentive to use the CRT-optimization of RSA.
+
+So now, bob is computing $s \equiv c_q + qh \mod{n}$. But imagine, that
+for some unfortunate reason, an error occurs either in the computation of
+$c_q$ or $qh$, but only in one them. And that error renders that $c_q$ or
+$qh$ is equivalent to 0.
+
+#H3 $hq = 0$
+
+So $s \equiv c_q \mod{n}$.  We know that for some integer $k$,
+$d = k(q - 1) + c_q$. So $c_q = d - k(q - 1)$. Let make computation in
+$\mod{q}$.
+$$\begin{aligned}
+	c_q &\equiv m^{d_q} \mod{n} \\
+	\iff	&\equiv m^{d} \times (m^{q-1})^{-k} \mod{q} \\
+	\iff c_q^e &\equiv (m^{d})^e \mod{q} \\
+			\iff c_q^e &\equiv m \mod{q}
+\end{aligned}$$
+So $c_q^e - m$ is divisible by $q$, so $c_q^e -m$ and $n$ shares a common
+factor, which can be retrieved by $\gcd(c_q^e - m, n)$.
+So as you can observe, if there is an error with the CRT optimization,
+it is possible to retrieve a factor of $n$. One can apply the same reasonning
+with $c_p$, $\mod{p}$, a good exercice by the way.
+
+A simple mitigation ... that nobody does
+----------------------------------------
+
+To be sure of digital signature is quite simple in that case.
+You just have to check whether or not the signature $s$ of
+the message $m$ satisfy $s^e \equiv m \mod{n}$. If it is not
+the case, then there have been an error in your computation.
+Either due to the design of your implementation, a fault in
+the processor or some attack on the hardware that performs
+the computations.
+
+You can find here[1], a very interesting paper, that shows
+this type of fault can actually happen very often during
+the handshake of TLS, and a lot a cryptographic API do
+not perform that sanity check by default. Another more
+general paper about the consequences of errors in cryptograph
+can be found there[2].
+
+Conclusion
+==========
+
+This article is barely a decent introduction to the concept
+of digital signatures, and how ubiquitous and important they
+are in our current digital world. It is important to stress
+out that without digital signatures, the internet as we
+know it would not exist, as we could not know who would be the
+real recipient of any sent/received data. Therefore, e-commerce
+would not exist, mail system would useless, etc...
+
+Another lesson one could try to derive from this, is the importance
+of the CRT in cryptography. This algorithm is both a great tool to
+optmize computation in RSA but also in many other cryptosystems, even
+the post-quantum cryptographic schemes. But beware, the CRT can also
+be used for cryptanalysis, as we saw in one of the
+[previous post](./2020-01-06-hadstadt.html).
+
+References
+==========
+[1] Weimer, F. (2015). Factoring RSA Keys With TLS Perfect Forward Secrecy. 
+
+[2] Boneh, D., DeMillo, R. A., & Lipton, R. J. (2001). On the importance of eliminating errors in cryptographic computations. Journal of cryptology, 14(2), 101-119.
