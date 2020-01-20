@@ -5,8 +5,9 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <title>Harpocrate's adventuresAn Introduction for the RSA cryptosystem</title>
         <link rel="stylesheet" type="text/css" href="../css/default.css" />
+        <link rel="stylesheet" type="text/css" href="../css/syntax.css" />
 		<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-		<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     </head>
     <body>
         <div id="header">
@@ -57,7 +58,7 @@
         \displaystyle\prod_{\beta \in \mathbb{Z}_{n}^{*}} \beta \\
         \iff &amp;\alpha^{\phi(n)} \equiv 1 \mod{n}
 \end{aligned}$$</span><br /></p>
-<p>Moreover there is a neat formula to compute <span class="math inline"><em>ϕ</em>(<em>n</em>)</span> if <span class="math inline"><em>p</em></span>, <span class="math inline"><em>q</em></span> the unique factors of <span class="math inline"><em>n</em></span> are known, <span class="math inline"><em>ϕ</em>(<em>n</em>) = (<em>p</em> − 1)(<em>q</em> − 1)</span>. Once <span class="math inline"><em>ϕ</em>(<em>n</em>)</span> is known, once can select an invertible integer <span class="math inline"><em>e</em></span> in <span class="math inline">ℤ<sub><em>ϕ</em>(<em>n</em>)</sub><sup>*</sup></span> and let <span class="math inline"><em>d</em></span> be its unique inverse in <span class="math inline">ℤ<sub><em>ϕ</em>(<em>n</em>)</sub><sup>*</sup></span>. By definition <span class="math inline"><em>e</em><em>d</em> ≡ 1mod <em>ϕ</em>(<em>n</em>) ⇔ <em>e</em><em>d</em> = <em>k</em><em>ϕ</em>(<em>n</em>) + 1</span>. So let <span class="math inline"><em>a</em> ∈ ℤ<sub><em>n</em></sub><sup>*</sup></span>, then <span class="math inline"><em>a</em><sup><em>k</em><em>ϕ</em>(<em>n</em>) + 1</sup> ≡ <em>a</em>mod <em>n</em></span>, which shows that the decryption process works if <span class="math inline"><em>a</em></span> is invertible. What if it is not the case:</p>
+<p>Moreover there is a neat formula to compute <span class="math inline"><em>ϕ</em>(<em>n</em>)</span> if <span class="math inline"><em>p</em></span>, <span class="math inline"><em>q</em></span> the unique factors of <span class="math inline"><em>n</em></span> are known, <span class="math inline"><em>ϕ</em>(<em>n</em>) = (<em>p</em> − 1)(<em>q</em> − 1)</span>. Once <span class="math inline"><em>ϕ</em>(<em>n</em>)</span> is known, once can select an invertible integer <span class="math inline"><em>e</em></span> in <span class="math inline">ℤ<sub><em>ϕ</em>(<em>n</em>)</sub><sup>*</sup></span> and let <span class="math inline"><em>d</em></span> be its unique inverse in <span class="math inline">ℤ<sub><em>ϕ</em>(<em>n</em>)</sub><sup>*</sup></span>. By definition <span class="math inline"><em>e</em><em>d</em> ≡ 1mod <em>ϕ</em>(<em>n</em>) ⇔ <em>e</em><em>d</em> = <em>k</em><em>ϕ</em>(<em>n</em>) + 1</span>, for some <span class="math inline"><em>k</em></span>. So let <span class="math inline"><em>a</em> ∈ ℤ<sub><em>n</em></sub><sup>*</sup></span>, then <span class="math inline"><em>a</em><sup><em>k</em><em>ϕ</em>(<em>n</em>) + 1</sup> ≡ (<em>a</em><sup><em>ϕ</em>(<em>n</em>)</sup>)<sup><em>k</em></sup> × <em>a</em> ≡ <em>a</em>mod <em>n</em></span>, which shows that the decryption process works if <span class="math inline"><em>a</em></span> is invertible. What if it is not the case:</p>
 <p>Let’s compute the same modular exponentiation <span class="math inline">mod <em>p</em></span> for an integer <span class="math inline"><em>b</em></span> which is not invertible modulo <span class="math inline"><em>n</em></span>. <br /><span class="math display">$$\begin{aligned}
     b^{ed} &amp;\equiv b^{k(p - 1)(q - 1)} \times b \mod{p}, k \in \mathbb{Z} \\
            &amp;\equiv (b^{p - 1})^{k(q - 1)}\end{aligned}$$</span><br /></p>
