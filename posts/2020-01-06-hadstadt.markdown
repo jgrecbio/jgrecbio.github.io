@@ -132,9 +132,12 @@ coprimeNis = map (n `quot`) nis
                   res = sum $ zipWith3 (\x y z -> x * y * z) ais coprimeNis inverseCoPrimeNis
                in expSafe res 1 n
 
-hadstadtAttack :: (Ciphertext, Ciphertext, Ciphertext) -> (Moduli, Moduli, Moduli) -> Plaintext
-hadstadtAttack (c1, c2, c3) (n1, n2, n3) = integerCubeRoot c
-				where c = crt [n1, n2, n3] [c1, c2, c3]
+hadstadtAttack :: (Ciphertext, Ciphertext, Ciphertext)
+                  -> (Moduli, Moduli, Moduli)
+                  -> Plaintext
+hadstadtAttack (c1, c2, c3) (n1, n2, n3)
+	= integerCubeRoot c
+		where c = crt [n1, n2, n3] [c1, c2, c3]
 ```
 
 The same reasonning can be applied if the same message is sent to 17 persons, and $e = 17$.

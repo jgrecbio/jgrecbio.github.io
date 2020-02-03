@@ -25,7 +25,9 @@ Whereas the private exponent $d$, the inverse
 of $e \mod{\phi(n)}$, is a much higher number, so the decryption
 is the more demanding task, by a long shot. That is the reason
 why the it is tempting to optimize the RSA cryptosystem for
-that step.
+that step. One could object that a potential solution would be
+to choose a small $d$ as a private exponent, but as we will see
+in a following [post](./2020-01-28-wiener-attack.html), this is not secure.
 
 The CRT to the rescue
 =====================

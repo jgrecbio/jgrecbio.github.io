@@ -133,7 +133,8 @@ keyGeneration = do
 	q <- generatePrime 512
 	return (p, q)
 
-generateExponents :: (Integer, Integer) -> (Integer, Integer, Integer)
+generateExponents :: (Integer, Integer)
+				      -> (Integer, Integer, Integer)
 generateExponents (p, q) = (n, e, d)
 	where n = p * q
 		  phi = (p - 1) * (q - 1)
@@ -153,10 +154,16 @@ type Plaintext = Integer
 type Moduli = Integer
 type Ciphertext = Integer
 
-encrypt :: PublicExponent -> Moduli -> Plaintext -> Ciphertext
+encrypt :: PublicExponent
+		   -> Moduli
+           -> Plaintext
+           -> Ciphertext
 encrypt e n plaintext = expSafe plaintext e n
 
-decrypt :: PrivateExponent -> Moduli -> Ciphertext -> Plaintext
+decrypt :: PrivateExponent
+           -> Moduli
+           -> Ciphertext
+           -> Plaintext
 decrypt d n ciphertex = expSafe ciphertext d n
 ```
 
