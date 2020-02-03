@@ -74,23 +74,30 @@
 <a class="sourceLine" id="cb1-7" title="7">	q <span class="ot">&lt;-</span> generatePrime <span class="dv">512</span></a>
 <a class="sourceLine" id="cb1-8" title="8">	<span class="fu">return</span> (p, q)</a>
 <a class="sourceLine" id="cb1-9" title="9"></a>
-<a class="sourceLine" id="cb1-10" title="10"><span class="ot">generateExponents ::</span> (<span class="dt">Integer</span>, <span class="dt">Integer</span>) <span class="ot">-&gt;</span> (<span class="dt">Integer</span>, <span class="dt">Integer</span>, <span class="dt">Integer</span>)</a>
-<a class="sourceLine" id="cb1-11" title="11">generateExponents (p, q) <span class="fu">=</span> (n, e, d)</a>
-<a class="sourceLine" id="cb1-12" title="12">	<span class="kw">where</span> n <span class="fu">=</span> p <span class="fu">*</span> q</a>
-<a class="sourceLine" id="cb1-13" title="13">		  phi <span class="fu">=</span> (p <span class="fu">-</span> <span class="dv">1</span>) <span class="fu">*</span> (q <span class="fu">-</span> <span class="dv">1</span>)</a>
-<a class="sourceLine" id="cb1-14" title="14">		  e <span class="fu">=</span> <span class="dv">65337</span></a>
-<a class="sourceLine" id="cb1-15" title="15">		  d <span class="fu">=</span> inverseCoprimes e phi</a></code></pre></div>
+<a class="sourceLine" id="cb1-10" title="10"><span class="ot">generateExponents ::</span> (<span class="dt">Integer</span>, <span class="dt">Integer</span>)</a>
+<a class="sourceLine" id="cb1-11" title="11">				      <span class="ot">-&gt;</span> (<span class="dt">Integer</span>, <span class="dt">Integer</span>, <span class="dt">Integer</span>)</a>
+<a class="sourceLine" id="cb1-12" title="12">generateExponents (p, q) <span class="fu">=</span> (n, e, d)</a>
+<a class="sourceLine" id="cb1-13" title="13">	<span class="kw">where</span> n <span class="fu">=</span> p <span class="fu">*</span> q</a>
+<a class="sourceLine" id="cb1-14" title="14">		  phi <span class="fu">=</span> (p <span class="fu">-</span> <span class="dv">1</span>) <span class="fu">*</span> (q <span class="fu">-</span> <span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb1-15" title="15">		  e <span class="fu">=</span> <span class="dv">65337</span></a>
+<a class="sourceLine" id="cb1-16" title="16">		  d <span class="fu">=</span> inverseCoprimes e phi</a></code></pre></div>
 <p>As explained, <span class="math inline"><em>e</em></span> is the public exponent and <span class="math inline"><em>d</em></span> is the private exponent. It is recommended to chose <span class="math inline"><em>e</em></span> as a prime so that it is coprime to <span class="math inline"><em>ϕ</em>(<em>p</em><em>q</em>)</span>. <span class="math inline"><em>e</em></span> is here a fermat prime, which speeds up the modular exponentiation algorithm which will be the subject for a later post. Once the keys are generated, let’s show the encryption process:</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb2-1" title="1"><span class="kw">type</span> <span class="dt">PublicExponent</span> <span class="fu">=</span> <span class="dt">Integer</span></a>
 <a class="sourceLine" id="cb2-2" title="2"><span class="kw">type</span> <span class="dt">Plaintext</span> <span class="fu">=</span> <span class="dt">Integer</span></a>
 <a class="sourceLine" id="cb2-3" title="3"><span class="kw">type</span> <span class="dt">Moduli</span> <span class="fu">=</span> <span class="dt">Integer</span></a>
 <a class="sourceLine" id="cb2-4" title="4"><span class="kw">type</span> <span class="dt">Ciphertext</span> <span class="fu">=</span> <span class="dt">Integer</span></a>
 <a class="sourceLine" id="cb2-5" title="5"></a>
-<a class="sourceLine" id="cb2-6" title="6"><span class="ot">encrypt ::</span> <span class="dt">PublicExponent</span> <span class="ot">-&gt;</span> <span class="dt">Moduli</span> <span class="ot">-&gt;</span> <span class="dt">Plaintext</span> <span class="ot">-&gt;</span> <span class="dt">Ciphertext</span></a>
-<a class="sourceLine" id="cb2-7" title="7">encrypt e n plaintext <span class="fu">=</span> expSafe plaintext e n</a>
-<a class="sourceLine" id="cb2-8" title="8"></a>
-<a class="sourceLine" id="cb2-9" title="9"><span class="ot">decrypt ::</span> <span class="dt">PrivateExponent</span> <span class="ot">-&gt;</span> <span class="dt">Moduli</span> <span class="ot">-&gt;</span> <span class="dt">Ciphertext</span> <span class="ot">-&gt;</span> <span class="dt">Plaintext</span></a>
-<a class="sourceLine" id="cb2-10" title="10">decrypt d n ciphertex <span class="fu">=</span> expSafe ciphertext d n</a></code></pre></div>
+<a class="sourceLine" id="cb2-6" title="6"><span class="ot">encrypt ::</span> <span class="dt">PublicExponent</span></a>
+<a class="sourceLine" id="cb2-7" title="7">		   <span class="ot">-&gt;</span> <span class="dt">Moduli</span></a>
+<a class="sourceLine" id="cb2-8" title="8">           <span class="ot">-&gt;</span> <span class="dt">Plaintext</span></a>
+<a class="sourceLine" id="cb2-9" title="9">           <span class="ot">-&gt;</span> <span class="dt">Ciphertext</span></a>
+<a class="sourceLine" id="cb2-10" title="10">encrypt e n plaintext <span class="fu">=</span> expSafe plaintext e n</a>
+<a class="sourceLine" id="cb2-11" title="11"></a>
+<a class="sourceLine" id="cb2-12" title="12"><span class="ot">decrypt ::</span> <span class="dt">PrivateExponent</span></a>
+<a class="sourceLine" id="cb2-13" title="13">           <span class="ot">-&gt;</span> <span class="dt">Moduli</span></a>
+<a class="sourceLine" id="cb2-14" title="14">           <span class="ot">-&gt;</span> <span class="dt">Ciphertext</span></a>
+<a class="sourceLine" id="cb2-15" title="15">           <span class="ot">-&gt;</span> <span class="dt">Plaintext</span></a>
+<a class="sourceLine" id="cb2-16" title="16">decrypt d n ciphertex <span class="fu">=</span> expSafe ciphertext d n</a></code></pre></div>
 <p>And that’s it.</p>
 <h1 id="conclusion">Conclusion</h1>
 <p>I just described what is called the schoolbook RSA. In order to make that cryptographic scheme secure, many more elements and verification are needed. And I want to insist on that, using the RSA this way is grossly insecure. By the way, some specialists are <a href="https://blog.trailofbits.com/2019/07/08/fuck-rsa/">advocating</a> to move out from RSA (very strongly) as implementing a safe RSA system is a very hard feat. In the following posts, I will show and exploit some the weaknesses that the RSA cryptosystem can display. The first of these will be the <a href="./2020-01-06-hadstadt.html">Hadstadt’s broadcast message attack</a>.</p>

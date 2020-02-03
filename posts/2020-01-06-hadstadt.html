@@ -62,9 +62,12 @@
 <a class="sourceLine" id="cb1-8" title="8">                  res <span class="fu">=</span> <span class="fu">sum</span> <span class="fu">$</span> <span class="fu">zipWith3</span> (\x y z <span class="ot">-&gt;</span> x <span class="fu">*</span> y <span class="fu">*</span> z) ais coprimeNis inverseCoPrimeNis</a>
 <a class="sourceLine" id="cb1-9" title="9">               <span class="kw">in</span> expSafe res <span class="dv">1</span> n</a>
 <a class="sourceLine" id="cb1-10" title="10"></a>
-<a class="sourceLine" id="cb1-11" title="11"><span class="ot">hadstadtAttack ::</span> (<span class="dt">Ciphertext</span>, <span class="dt">Ciphertext</span>, <span class="dt">Ciphertext</span>) <span class="ot">-&gt;</span> (<span class="dt">Moduli</span>, <span class="dt">Moduli</span>, <span class="dt">Moduli</span>) <span class="ot">-&gt;</span> <span class="dt">Plaintext</span></a>
-<a class="sourceLine" id="cb1-12" title="12">hadstadtAttack (c1, c2, c3) (n1, n2, n3) <span class="fu">=</span> integerCubeRoot c</a>
-<a class="sourceLine" id="cb1-13" title="13">				<span class="kw">where</span> c <span class="fu">=</span> crt [n1, n2, n3] [c1, c2, c3]</a></code></pre></div>
+<a class="sourceLine" id="cb1-11" title="11"><span class="ot">hadstadtAttack ::</span> (<span class="dt">Ciphertext</span>, <span class="dt">Ciphertext</span>, <span class="dt">Ciphertext</span>)</a>
+<a class="sourceLine" id="cb1-12" title="12">                  <span class="ot">-&gt;</span> (<span class="dt">Moduli</span>, <span class="dt">Moduli</span>, <span class="dt">Moduli</span>)</a>
+<a class="sourceLine" id="cb1-13" title="13">                  <span class="ot">-&gt;</span> <span class="dt">Plaintext</span></a>
+<a class="sourceLine" id="cb1-14" title="14">hadstadtAttack (c1, c2, c3) (n1, n2, n3)</a>
+<a class="sourceLine" id="cb1-15" title="15">	<span class="fu">=</span> integerCubeRoot c</a>
+<a class="sourceLine" id="cb1-16" title="16">		<span class="kw">where</span> c <span class="fu">=</span> crt [n1, n2, n3] [c1, c2, c3]</a></code></pre></div>
 <p>The same reasonning can be applied if the same message is sent to 17 persons, and <span class="math inline"><em>e</em> = 17</span>.</p>
 <h2 id="conclusion">Conclusion</h2>
 <p>So as we’ve seen, using a small value for public exponent does expose the RSA cryptosystem to a security flaw. This is the reason why, the guidelines for building secure RSA cryptosystem implementations advise to use <span class="math inline"><em>e</em> = 65537</span>. Why this integer in particular? 65537 is actually a prime number from the family of fermat’s prime. Fermat’s primes are of the form <span class="math inline">2<sup>2<sup><em>n</em></sup></sup> + 1</span>. This actually helps to optimize the modular exponentiation algorithm upon which is build the RSA scheme. But, the modular exponentiation and its algorithm deserve a post on their own. The code for mounting this attack is fairly simple, this explains why this attack is very often present in <a href="https://cryptopals.com/sets/5/challenges/40">CTFs</a></p>

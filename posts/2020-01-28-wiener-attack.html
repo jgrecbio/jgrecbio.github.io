@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>Harpocrate's adventuresThe Wiener Attack</title>
+        <link rel="stylesheet" type="text/css" href="../css/default.css" />
+        <link rel="stylesheet" type="text/css" href="../css/syntax.css" />
+		<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    </head>
+    <body>
+        <div id="header">
+            <div id="logo">
+                <a href="../">Harpocrate's adventures</a>
+            </div>
+            <div id="navigation">
+                <a href="../">Home</a>
+                <a href="../about.html">About</a>
+                <a href="../contact.html">Contact</a>
+                <a href="../archive.html">Archive</a>
+            </div>
+        </div>
+
+        <div id="content">
+            <h1>The Wiener Attack</h1>
+
+            <div class="info">
+    Posted on January 28, 2020
+    
+</div>
+
+<p><em>This post assume that the reader is familiar with the RSA cryptosystem.</em></p>
+<p>As we gleaned about on some of the previous posts, RSA can be used to encrypt stuff, but also to sign documents. In that case, it can be interesting to optimize the computations to limit the cost of modular exponentiation of the private exponent <span class="math inline"><em>d</em></span>. This need can be extremely important if the hardware in charge of the signature is not very powerful, as it is often the case. As we have seen in the <a href="./2020-01-18-rsa-crt.html">previous post</a>, computations can be speed up with the CRT algorithm but this approach is not without some associated risks. So, imagine an apprentice cryptographer Bob, who just noticed that in order to reduce the number ofcomputations on the signing side, it is possible to choose a small value for <span class="math inline"><em>d</em></span>. And voila! But this actually makes the RSA signing scheme very insecure, as it opens to an attack with the help of continued fractions. This attack is coined as the Wiener’s attack and were published some 30 years ago.</p>
+<p>So I will start here to describe what are continued fractions, their link to the famous Euclid’s algorithm to compute the GCD and how to attack RSA with that knowledge.</p>
+<h1 id="continued-fractions-and-the-euclid-algorithm">Continued Fractions and the Euclid algorithm</h1>
+<p>Let <span class="math inline"><em>a</em>/<em>b</em></span> be a rational. Let <span class="math inline"><em>r</em><sub>0</sub> = <em>a</em></span> and <span class="math inline"><em>r</em><sub>1</sub> = <em>b</em></span> and start the euclidean division:</p>
+<p><br /><span class="math display">$$\begin{aligned}
+		&amp;r_0 = q_0r_1 + r_2 \\
+		\implies &amp;\frac{r_0}{r_1} = q_0 + \frac{r_2}{r_1} \\
+		\implies &amp;\frac{a}{b} = r_1 + \frac{1}{\frac{r_1}{r_2}}
+\end{aligned}$$</span><br /></p>
+<p>And we can also perform the euclidean division on <span class="math inline"><em>r</em><sub>1</sub></span> by <span class="math inline"><em>r</em><sub>2</sub></span>. Which will develop this continued fraction further. <br /><span class="math display">$$\begin{aligned}
+		\implies &amp;\frac{a}{b} = q_0 + \cfrac{1}{q_1 + \cfrac{r_3}{r_2}}
+\end{aligned}$$</span><br /> It is possible to continue this process until one of the <span class="math inline"><em>r</em><sub><em>i</em></sub></span>’s equal zero. An attentive reader probably recognized the algorithm of Euclid for finding the GCD of <span class="math inline"><em>a</em></span> and <span class="math inline"><em>b</em></span>. As the <span class="math inline"><em>r</em><sub><em>i</em></sub></span>’s are strictly decreasing, this proces is garanted to terminate in a finite number of steps, moreover it can be proven that for any integer <span class="math inline"><em>a</em></span>, <span class="math inline"><em>b</em></span>, this algorithm runs in at most <span class="math inline"><em>O</em>(2 × <em>l</em><em>o</em><em>g</em><sub>2</sub>(<em>v</em> + 1)</span>, which is in polynomial time.</p>
+<p>The sequence of quotients in continued fraction is denoted <span class="math inline">[<em>a</em><sub>0</sub>, <em>a</em><sub>1</sub>, …, ...]</span> as shown below: <br /><span class="math display">$$
+\begin{aligned}
+	\frac{a}{b}=a_0+\cfrac{1}{a_1+\cfrac{1}{a_2+\cfrac{1}{a_3+\cfrac{1}{a_4+\cfrac{1}{a_5+\cfrac{1}{a_6+\cfrac{1}{a_7+\cfrac{1}{a_8+\cdots}}}}}}}} = [a_0, \cdots]
+\end{aligned}
+$$</span><br /></p>
+<p>Computing the continued fraction from the division of two integers is then fairly simple:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb1-1" title="1"><span class="ot">contFrac ::</span> (<span class="dt">Integer</span>, <span class="dt">Integer</span>) <span class="ot">-&gt;</span> [<span class="dt">Integer</span>] <span class="ot">-&gt;</span> [<span class="dt">Integer</span>]</a>
+<a class="sourceLine" id="cb1-2" title="2">contFrac (a, b) as  <span class="fu">=</span> <span class="kw">let</span> (q, r) <span class="fu">=</span> a <span class="ot">`divMod`</span> b</a>
+<a class="sourceLine" id="cb1-3" title="3">                       <span class="kw">in</span> <span class="kw">if</span> r <span class="fu">==</span> <span class="dv">0</span></a>
+<a class="sourceLine" id="cb1-4" title="4">                             <span class="kw">then</span> as <span class="fu">++</span> [q]</a>
+<a class="sourceLine" id="cb1-5" title="5">                             <span class="kw">else</span> contFrac (b, r) (as <span class="fu">++</span> [q])</a></code></pre></div>
+<p>To close this section, let define what is a convergent. Let <span class="math inline">[<em>a</em><sub>0</sub>, ⋯, <em>a</em><sub><em>n</em></sub>]</span> be a continued fractions equal to <span class="math inline"><em>a</em>/<em>b</em></span>. Let <span class="math inline"><em>p</em><sub><em>m</em></sub>/<em>q</em><sub><em>m</em></sub></span> be a convergent of <span class="math inline"><em>a</em>/<em>b</em></span> if <span class="math inline"><em>p</em><sub><em>m</em></sub>/<em>q</em><sub><em>m</em></sub></span> is equal to <span class="math inline">[<em>a</em><sub>0</sub>, ⋯, <em>a</em><sub><em>m</em></sub>]</span> for <span class="math inline"><em>m</em> ≤ <em>n</em></span>.</p>
+<p>It can be proven relatively easily through recursion that for <span class="math inline"><em>m</em> ≤ <em>n</em></span> the convergents <span class="math inline"><em>p</em><sub><em>m</em></sub>/<em>q</em><sub><em>n</em></sub></span> of <span class="math inline"><em>a</em>/<em>b</em></span> is: <br /><span class="math display">$$\begin{aligned}
+p_m &amp;= a_m * p_{m - 1} + p_{m _ 2} \\
+q_m &amp;= a_m * q_{m - 1} + q_{m - 2}
+\end{aligned}$$</span><br /> With <span class="math inline"><em>p</em><sub>0</sub> = <em>a</em><sub>0</sub></span>, <span class="math inline"><em>q</em><sub>0</sub> = 1</span>, <span class="math inline"><em>p</em><sub>1</sub> = <em>a</em><sub>0</sub><em>a</em><sub>1</sub> + 1</span> and <span class="math inline"><em>q</em><sub>1</sub> = <em>a</em><sub>1</sub></span>.</p>
+<p>To compute the convergents is not difficult either:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb2-1" title="1"><span class="ot">convergents ::</span> [<span class="dt">Integer</span>]</a>
+<a class="sourceLine" id="cb2-2" title="2">               <span class="ot">-&gt;</span> [(<span class="dt">Integer</span>, <span class="dt">Integer</span>)]</a>
+<a class="sourceLine" id="cb2-3" title="3">               <span class="ot">-&gt;</span> [(<span class="dt">Integer</span>, <span class="dt">Integer</span>)]</a>
+<a class="sourceLine" id="cb2-4" title="4">convergents [] cs <span class="fu">=</span> cs</a>
+<a class="sourceLine" id="cb2-5" title="5">convergents (an<span class="fu">:</span>as) cs <span class="fu">=</span> <span class="kw">let</span> (pn1, qn1) <span class="fu">=</span> <span class="fu">head</span> cs</a>
+<a class="sourceLine" id="cb2-6" title="6">                             (pn2, qn2) <span class="fu">=</span> <span class="fu">head</span> <span class="fu">.</span> <span class="fu">tail</span> <span class="fu">$</span> cs</a>
+<a class="sourceLine" id="cb2-7" title="7">                             pn <span class="fu">=</span> an <span class="fu">*</span> pn1 <span class="fu">+</span> pn2</a>
+<a class="sourceLine" id="cb2-8" title="8">                             qn <span class="fu">=</span> an <span class="fu">*</span> qn1 <span class="fu">+</span> qn2</a>
+<a class="sourceLine" id="cb2-9" title="9">                          <span class="kw">in</span> convergents as ((pn, qn)<span class="fu">:</span>cs)</a></code></pre></div>
+<h1 id="continued-fractions-and-number-approximation">Continued Fractions and Number Approximation</h1>
+<p>But that may be beautiful, but why all the fuss about continued fractions in the context of RSA (beside the RSA context, infinite continued fractions can be used to represent irrational numbers such as <span class="math inline"><em>π</em></span>, the euler constant <span class="math inline"><em>e</em></span>, which also yields a way to compute their approximation, this is the way Archidemes computed <span class="math inline"><em>π</em></span> as <span class="math inline">22/7</span>) ? It all comes from the Legendre theorem, which states that if: <br /><span class="math display">$$\begin{aligned}
+	|x - \frac{a}{b}| \leq \frac{1}{2b^2}
+\end{aligned}$$</span><br /> Then <span class="math inline"><em>a</em>/<em>b</em></span> must be equal to a convergent of <span class="math inline"><em>x</em></span>. So imagine that Marvin — an attacker — is able to compute a rational approximate <span class="math inline"><em>a</em>/<em>b</em></span> of <span class="math inline"><em>d</em></span> from the public key <span class="math inline">(<em>e</em>, <em>n</em>)</span>. And that <span class="math inline">|<em>d</em> − <em>a</em>/<em>b</em>| ≤ 1/2<em>b</em><sup>2</sup></span>. Then it provides us a way to compute <span class="math inline"><em>d</em></span>, by testing the convergents of<span class="math inline"><em>a</em>/<em>b</em></span> as a candidate for <span class="math inline"><em>d</em></span>, and then decrypt any message encrypted with such a weak key. Indeed the Euclid algorithm applied together with continued fractions, would offer us a polynomial method to find <span class="math inline"><em>d</em></span>. But it is not as simple as it is not as easy to find an estimate of the private exponent <span class="math inline"><em>d</em></span>.</p>
+<h1 id="the-wieners-attack">The Wiener’s Attack</h1>
+<p>This is the idea behind the Wiener attack but it does not work by finding an estimate of <span class="math inline"><em>d</em></span> but instead something close enough.</p>
+<p>We know that: <br /><span class="math display">$$\begin{aligned}
+	&amp;ed \equiv 1 \mod{n} \\
+\iff &amp;ed - 1 = k\phi(n), k \in \mathbb{Z} \\
+\iff &amp;ed - k\phi(n) = 1 \\
+\iff &amp;\frac{ed}{\phi(n)} - k = \frac{1}{\phi(n)} \\
+\iff &amp;\frac{e}{\phi(n)} - \frac{k}{d} = \frac{1}{d\phi(n)}
+\end{aligned}$$</span><br /></p>
+<p>Now by convention assume, that <span class="math inline"><em>q</em></span> is the smaller factor of the modulus <span class="math inline"><em>n</em></span>. Therefore <span class="math inline"><em>q</em> &lt; <em>p</em> ⟹ <em>q</em><sup>2</sup> &lt; <em>p</em> × <em>q</em> &lt; <em>n</em> ⟹ <em>q</em> &lt; <em>n</em><sup>0.5</sup></span>. <br /><span class="math display">$$\begin{aligned}
+	&amp;\phi(n) = (p - 1) (q - 1) = n - (p + q) + 1 \\
+\iff &amp; n - \phi(n) = p + q - 1 &lt; 2q + q - 1 &lt; 3q &lt; 3\sqrt{n} \\\end{aligned}$$</span><br /></p>
+<p>Armed with that: <br /><span class="math display">$$\begin{aligned}
+|\frac{e}{n} - \frac{k}{d}| &amp;= |\frac{ed - kn}{nd}| \\
+							&amp;= \frac{1 + k\phi(n) - k(\phi(n) + p + q - 1}{nd} \\
+							&amp;= \frac{1 - k(p + q - 1)}{nd} \\
+							&amp;= \frac{1 + k(\phi(n) - n)}{nd} \\
+						    &amp;&lt; \frac{3k\sqrt{n}}{dn} \\
+							&amp;= \frac{3k}{d\sqrt{n}}
+\end{aligned}$$</span><br /></p>
+<p>Or we know that <span class="math inline"><em>k</em> &lt; <em>d</em></span>, so <span class="math inline">3<em>k</em> &lt; 3<em>d</em></span>. Now let assume that: <br /><span class="math display">$$\begin{aligned}
+d &lt; \frac{n^0.25}{3} 
+\implies 3d^2 &lt; dn^025 
+&amp;\implies \frac{1}{3d^2} &gt; \frac{1}{n^0.25} &gt; |\frac{e}{n} - \frac{k}{d}| \\
+&amp;\implies |\frac{e}{n} - \frac{k}{d}| &lt; \frac{1}{d^2}
+\end{aligned}$$</span><br /></p>
+<p>Which by Legendre theorem proves that <span class="math inline"><em>k</em>/<em>d</em></span> is a convergent of <span class="math inline"><em>e</em>/<em>n</em></span>. So once <span class="math inline"><em>k</em>/<em>d</em></span> has was retrieved, what to do?</p>
+<p>Now we have a rational <span class="math inline"><em>a</em>/<em>b</em></span> equal to <span class="math inline"><em>k</em>/<em>d</em></span> so: <br /><span class="math display">$$\begin{aligned}
+	\frac{b}{a} &amp;= \frac{d}{k} \\
+	\frac{be}{a} &amp;= \frac{ed}{k} \\
+				&amp;= \frac{k\phi(n) + 1}{k} \\
+				&amp;= \phi(n) + \frac{1}{k}
+\end{aligned}$$</span><br /> Or <span class="math inline">1/<em>k</em></span> is inferior to 1, so by rounding, we can get <span class="math inline"><em>ϕ</em>(<em>n</em>)</span> which is course sufficient to find <span class="math inline"><em>d</em></span> from the public exponent <span class="math inline"><em>e</em></span>.</p>
+<h1 id="conclusion">Conclusion</h1>
+<p>This attack really amazed me, as I would not have imagined that one could foment one from continued fractions (which are about rational and irrational numbers) to find a weakness in the RSA cryptosystem. To me the link between the two has to be about the Euclid’s algorithm rooted in the continued fraction concept. Nonetheless this attack warns us not to use small value of <span class="math inline"><em>d</em></span> to speed up the decryption process of RSA, even though we may have incentives to do so.</p>
+<p>To conclude, there are improvements of this attack which may be the subject of following posts.</p>
+
+        </div>
+        <div id="footer">
+            Site proudly generated by
+           <a href="http://jaspervdj.be/hakyll">Hakyll</a>
+        </div>
+    </body>
+</html>
