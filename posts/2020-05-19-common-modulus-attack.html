@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>Harpocrate's adventuresThe Shared Common Modulus Weakness</title>
+        <link rel="stylesheet" type="text/css" href="../css/default.css" />
+        <link rel="stylesheet" type="text/css" href="../css/syntax.css" />
+		<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    </head>
+    <body>
+        <div id="header">
+            <div id="logo">
+                <a href="../">Harpocrate's adventures</a>
+            </div>
+            <div id="navigation">
+                <a href="../">Home</a>
+                <a href="../about.html">About</a>
+                <a href="../contact.html">Contact</a>
+                <a href="../archive.html">Archive</a>
+            </div>
+        </div>
+
+        <div id="content">
+            <h1>The Shared Common Modulus Weakness</h1>
+
+            <div class="info">
+    Posted on May 19, 2020
+    
+</div>
+
+<h1 id="introduction">Introduction</h1>
+<p>In the last posts, we saw that RSA encryption can be computationaly expensive. There two main pain points:</p>
+<ol type="1">
+<li>The first one is the cost payed for modular exponentiation.</li>
+<li>The second has to do with the creation of the keys.</li>
+</ol>
+<p>Generating truly randon RSA keys in large number is a complicated and costly endeavor, which many systems face. So finding a way to reduce that cost is very tempting.</p>
+<p>One could try to take advantage of the fact that the private key only needs to contain the private exponent and the modulus, while the public key is composed of the public exponent and the modulus. So imagine that a central authority wants to distribute <span class="math inline"><em>n</em></span> RSA keys. So it first chooses two primes <span class="math inline"><em>p</em></span> and <span class="math inline"><em>q</em></span> and pick <span class="math inline"><em>n</em></span> different public exponents (of course not too small nor too big). For each of these public exponent, a private exponent <span class="math inline"><em>e</em></span> is computed.</p>
+<p>So each of the recipient, would receive the same modulus <span class="math inline"><em>N</em> = <em>p</em><em>q</em></span>, but a unique public exponent <span class="math inline"><em>e</em></span> and its specific corresponding private exponent <span class="math inline"><em>d</em></span>. As long as one cannot retrive the factorization of <span class="math inline"><em>N</em></span> from a tuple <span class="math inline">(<em>d</em>, <em>N</em>)</span>, everybody has its own public and private key, and no recipient is able to decrypt message attributed to the other recipients. And all of that for the cost of generating two primes.</p>
+<p>But, of course, this is too good to be true, and as we will see one can easily retrieve the factorization of <span class="math inline"><em>N</em></span> from the private exponent <span class="math inline"><em>d</em></span>.</p>
+<h1 id="the-common-modulus-attack">The common modulus attack</h1>
+<p>So imagine that your own one of the private key <span class="math inline">(<em>d</em>, <em>N</em>)</span>. And <span class="math inline"><em>d</em></span> is the inverse of <span class="math inline"><em>e</em></span> modulo <span class="math inline"><em>ϕ</em>(<em>N</em>)</span> (or <span class="math inline"><em>λ</em>(<em>N</em>)</span> but the reasoning is the same). So: <br /><span class="math display">$$\begin{aligned}
+	&amp;ed \equiv 1 \mod{\phi(N)} \\
+	\iff &amp;ed - 1 = k\phi(N)
+\end{aligned}$$</span><br /> And <span class="math inline"><em>ϕ</em>(<em>N</em>) = (<em>p</em> − 1)(<em>q</em> − 1)</span>, with <span class="math inline"><em>p</em></span>, <span class="math inline"><em>q</em></span> two large primes, so bigger than 2. As <span class="math inline"><em>p</em></span> and <span class="math inline"><em>q</em></span> are odd, <span class="math inline"><em>ϕ</em>(<em>n</em>)</span> must be even, so <span class="math inline"><em>e</em><em>d</em> − 1 = <em>k</em><em>ϕ</em>(<em>N</em>)</span> must be even as well. Let denote <span class="math inline"><em>k</em><em>ϕ</em>(<em>N</em>) = 2<sup><em>t</em></sup><em>r</em></span>, for some <span class="math inline"><em>t</em> ∈ ℤ</span>.</p>
+<p>So let pick an integer <span class="math inline"><em>x</em></span> betwenn 0 and <span class="math inline"><em>N</em> − 1</span> and let compute: <br /><span class="math display">$$\begin{aligned}
+	S = \{x^{2^{t - 1}r}, x^{2^{t - 2}r}, \cdots, x^r\}
+\end{aligned}$$</span><br /></p>
+<p>Let assume that for some <span class="math inline"><em>a</em> ∈ <em>S</em></span>, <span class="math inline"><em>x</em><sup><em>e</em></sup> = 1</span> and <span class="math inline"><em>x</em><sup><em>a</em>/2</sup> ≡ <em>c</em>mod <em>n</em></span>. so <span class="math inline"><em>c</em><sup>2</sup> ≡ 1mod <em>n</em> ⇔ (<em>c</em> − 1)(<em>c</em> + 1) ≡ 0mod <em>n</em></span>. So by the CRT: <br /><span class="math display">$$\begin{aligned}
+	(c - 1) (c + 1) \equiv 0 \mod{p} \iff c + 1 \equiv 0 \mod{p} \lor c - 1 \equiv 0 \mod{p} \\
+	(c - 1) (c + 1) \equiv 0 \mod{q} \iff c + 1 \equiv 0 \mod{q} \lor c - 1 \equiv 0 \mod{q} \\
+\end{aligned}$$</span><br /></p>
+<p>As <span class="math inline"><em>p</em></span> is prime, either <span class="math inline"><em>p</em>|<em>c</em> + 1</span> or <span class="math inline"><em>p</em>|<em>c</em> − 1</span>, the same reasonning applies for <span class="math inline"><em>q</em></span>. So either <span class="math inline"><em>c</em> + 1</span> or <span class="math inline"><em>c</em> − 1</span> shares a common factor with <span class="math inline"><em>N</em></span>, so <span class="math inline"><em>p</em> = <em>g</em><em>c</em><em>d</em>(<em>c</em> ± 1, <em>N</em>)</span>.</p>
+<p>So the main question is, how likely is it to find such a witness <span class="math inline"><em>x</em></span>.</p>
+<h1 id="how-likely-that-witnesses-are">How likely that witnesses are ?</h1>
+<p>Given a witness <span class="math inline"><em>x</em></span>, for a certain index <span class="math inline"><em>i</em></span>, we are garanteed that: <br /><span class="math display">$$\begin{aligned}
+	x^{s_i} = 1 \land x^{s_{i + 1}} \neq 1
+\end{aligned}$$</span><br /> As we saw in the previous section, the value of <span class="math inline"><em>x</em><sup><em>s</em><sub><em>i</em> + 1</sub></sup></span> could either be:</p>
+<ul>
+<li><span class="math inline">1mod <em>p</em></span> and <span class="math inline">1mod <em>q</em></span></li>
+<li><span class="math inline"> − 1mod <em>p</em></span> and <span class="math inline"> − 1mod <em>q</em></span></li>
+<li><span class="math inline"> − 1mod <em>p</em></span> and <span class="math inline">1mod <em>q</em></span></li>
+<li><span class="math inline">1mod <em>p</em></span> and <span class="math inline"> − 1mod <em>q</em></span></li>
+</ul>
+<p>If both, <span class="math inline"><em>s</em><sub><em>i</em></sub></span> are equal to 1 or -1, the solution is trivial, 1 or -1, as 0 is a common factor to N. But it is -1 and 1, then a non-trivial solution exist. So if one pick a random <span class="math inline"><em>x</em></span>, <span class="math inline"><em>x</em><sup><em>e</em></sup></span> would also be a random value, and the probability that <span class="math inline"><em>P</em>(<em>x</em><sup><em>e</em></sup> ≡ 1mod <em>p</em>) = <em>P</em>(<em>x</em><sup><em>e</em></sup> ≡  − 1mod <em>p</em>)</span> So in our case, there a 50% chance that <span class="math inline"><em>x</em><sup><em>s</em><sub><em>i</em></sub></sup> ≡ 1mod <em>p</em></span>, and a 50% chance that <span class="math inline"><em>x</em><sup><em>s</em><sub><em>i</em></sub></sup> ≡  − 1mod <em>q</em></span>. And the reverse also gives a non trivial solution. So there a 50% chance to get a working witness.</p>
+<h1 id="write-up-in-haskell">Write-up in Haskell</h1>
+<div class="sourceCode" id="cb1"><pre class="sourceCode haskell"><code class="sourceCode haskell"><a class="sourceLine" id="cb1-1" title="1"><span class="ot">reduc2Phi ::</span> <span class="dt">Integer</span> <span class="ot">-&gt;</span> <span class="dt">Integer</span> <span class="ot">-&gt;</span> <span class="dt">Integer</span> <span class="ot">-&gt;</span> <span class="dt">Integer</span></a>
+<a class="sourceLine" id="cb1-2" title="2">reduc2Phi n ed g <span class="fu">=</span> <span class="kw">let</span> ts <span class="fu">=</span> <span class="fu">iterate</span> (<span class="ot">`div`</span> <span class="dv">2</span>) (ed <span class="fu">-</span> <span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb1-3" title="3">                       gs <span class="fu">=</span> <span class="fu">map</span> (\x <span class="ot">-&gt;</span> expFast g x n) ts</a>
+<a class="sourceLine" id="cb1-4" title="4">                       x <span class="fu">=</span> fromMaybe <span class="dv">1</span> <span class="fu">$</span> find (<span class="fu">/=</span> <span class="dv">1</span>) gs</a>
+<a class="sourceLine" id="cb1-5" title="5">                    <span class="kw">in</span> <span class="fu">gcd</span> (x <span class="fu">-</span> <span class="dv">1</span>) n</a>
+<a class="sourceLine" id="cb1-6" title="6"></a>
+<a class="sourceLine" id="cb1-7" title="7"></a>
+<a class="sourceLine" id="cb1-8" title="8"><span class="ot">generateCoprime ::</span> <span class="dt">MonadRandom</span>  m <span class="ot">=&gt;</span> <span class="dt">Integer</span> <span class="ot">-&gt;</span> m <span class="dt">Integer</span></a>
+<a class="sourceLine" id="cb1-9" title="9">generateCoprime n <span class="fu">=</span> <span class="kw">do</span></a>
+<a class="sourceLine" id="cb1-10" title="10">    g <span class="ot">&lt;-</span> generateMax n</a>
+<a class="sourceLine" id="cb1-11" title="11">    <span class="kw">if</span> <span class="fu">gcd</span> g n <span class="fu">==</span> <span class="dv">1</span></a>
+<a class="sourceLine" id="cb1-12" title="12">      <span class="kw">then</span> <span class="fu">return</span> g</a>
+<a class="sourceLine" id="cb1-13" title="13">      <span class="kw">else</span> generateCoprime n</a>
+<a class="sourceLine" id="cb1-14" title="14"></a>
+<a class="sourceLine" id="cb1-15" title="15"></a>
+<a class="sourceLine" id="cb1-16" title="16"><span class="ot">randomReducPhi ::</span> <span class="dt">MonadRandom</span> m <span class="ot">=&gt;</span> <span class="dt">Integer</span> <span class="ot">-&gt;</span> <span class="dt">Integer</span> <span class="ot">-&gt;</span> m <span class="dt">Integer</span></a>
+<a class="sourceLine" id="cb1-17" title="17">randomReducPhi n ed <span class="fu">=</span> <span class="kw">do</span></a>
+<a class="sourceLine" id="cb1-18" title="18">    g <span class="ot">&lt;-</span> generateCoprime n</a>
+<a class="sourceLine" id="cb1-19" title="19">    <span class="kw">let</span> cand <span class="fu">=</span> reduc2Phi n ed g</a>
+<a class="sourceLine" id="cb1-20" title="20">    <span class="kw">if</span> cand <span class="fu">==</span> <span class="dv">1</span></a>
+<a class="sourceLine" id="cb1-21" title="21">      <span class="kw">then</span> randomReducPhi n ed</a>
+<a class="sourceLine" id="cb1-22" title="22">      <span class="kw">else</span> <span class="fu">return</span> cand</a>
+<a class="sourceLine" id="cb1-23" title="23"></a>
+<a class="sourceLine" id="cb1-24" title="24"><span class="ot">edFactors ::</span> <span class="dt">MonadRandom</span> m <span class="ot">=&gt;</span> <span class="dt">Integer</span> <span class="ot">-&gt;</span> <span class="dt">Integer</span> <span class="ot">-&gt;</span> <span class="dt">Integer</span> <span class="ot">-&gt;</span> m (<span class="dt">Integer</span>, <span class="dt">Integer</span>)</a>
+<a class="sourceLine" id="cb1-25" title="25">edFactors n e d <span class="fu">=</span> <span class="kw">do</span></a>
+<a class="sourceLine" id="cb1-26" title="26">    p <span class="ot">&lt;-</span> randomReducPhi n (e <span class="fu">*</span> d)</a>
+<a class="sourceLine" id="cb1-27" title="27">    <span class="fu">return</span> (p, n <span class="ot">`div`</span> p)</a></code></pre></div>
+<h1 id="conclusion">Conclusion</h1>
+<p>Although tempting, one cannot share the modulus but keep a unique couple of public and private exponent. It is all too easy to retrieve the factorization of <span class="math inline"><em>N</em></span> given a valid private exponent.</p>
+
+        </div>
+        <div id="footer">
+            Site proudly generated by
+           <a href="http://jaspervdj.be/hakyll">Hakyll</a>
+        </div>
+    </body>
+</html>

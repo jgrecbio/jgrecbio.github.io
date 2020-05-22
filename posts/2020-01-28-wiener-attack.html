@@ -31,7 +31,7 @@
 </div>
 
 <p><em>This post assume that the reader is familiar with the RSA cryptosystem.</em></p>
-<p>As we gleaned about on some of the previous posts, RSA can be used to encrypt stuff, but also to sign documents. In that case, it can be interesting to optimize the computations to limit the cost of modular exponentiation of the private exponent <span class="math inline"><em>d</em></span>. This need can be extremely important if the hardware in charge of the signature is not very powerful, as it is often the case. As we have seen in the <a href="./2020-01-18-rsa-crt.html">previous post</a>, computations can be speed up with the CRT algorithm but this approach is not without some associated risks. So, imagine an apprentice cryptographer Bob, who just noticed that in order to reduce the number ofcomputations on the signing side, it is possible to choose a small value for <span class="math inline"><em>d</em></span>. And voila! But this actually makes the RSA signing scheme very insecure, as it opens to an attack with the help of continued fractions. This attack is coined as the Wiener’s attack and were published some 30 years ago.</p>
+<p>As we gleaned about on some of the previous posts, RSA can be used to encrypt stuff, but also to sign documents. In that case, it can be interesting to optimize the computations to limit the cost of modular exponentiation of the private exponent <span class="math inline"><em>d</em></span>, which would be performed by the signing authority. This need can be extremely important if the hardware in charge of the signature is not very powerful, as it is often the case. As we have seen in the <a href="./2020-01-18-rsa-crt.html">previous post</a>, computations can be speed up with the CRT algorithm but this approach is not without some associated risks. So, imagine an apprentice cryptographer Bob, who just noticed that in order to reduce the number ofcomputations on the signing side, it is possible to choose a small value for <span class="math inline"><em>d</em></span>. And voila! But this actually can make the RSA signing scheme very insecure, as it opens to an attack with the help of continued fractions. This attack is coined as the Wiener’s attack and were published some 30 years ago.</p>
 <p>So I will start here to describe what are continued fractions, their link to the famous Euclid’s algorithm to compute the GCD and how to attack RSA with that knowledge.</p>
 <h1 id="continued-fractions-and-the-euclid-algorithm">Continued Fractions and the Euclid algorithm</h1>
 <p>Let <span class="math inline"><em>a</em>/<em>b</em></span> be a rational. Let <span class="math inline"><em>r</em><sub>0</sub> = <em>a</em></span> and <span class="math inline"><em>r</em><sub>1</sub> = <em>b</em></span> and start the euclidean division:</p>
@@ -94,8 +94,8 @@ q_m &amp;= a_m * q_{m - 1} + q_{m - 2}
 							&amp;= \frac{3k}{d\sqrt{n}}
 \end{aligned}$$</span><br /></p>
 <p>Or we know that <span class="math inline"><em>k</em> &lt; <em>d</em></span>, so <span class="math inline">3<em>k</em> &lt; 3<em>d</em></span>. Now let assume that: <br /><span class="math display">$$\begin{aligned}
-d &lt; \frac{n^0.25}{3} 
-\implies 3d^2 &lt; dn^025 
+d &lt; \frac{n^{0.25}}{3} 
+\implies 3d^2 &lt; dn^{0.25}
 &amp;\implies \frac{1}{3d^2} &gt; \frac{1}{n^0.25} &gt; |\frac{e}{n} - \frac{k}{d}| \\
 &amp;\implies |\frac{e}{n} - \frac{k}{d}| &lt; \frac{1}{d^2}
 \end{aligned}$$</span><br /></p>
